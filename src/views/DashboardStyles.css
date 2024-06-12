@@ -1,0 +1,25 @@
+.custom-card {
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+  }
+  
+  .custom-card .card-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+  }
+  
+  .custom-card .card-text {
+    font-size: 1rem;
+  }
+  
+  .custom-card img {
+    width: 150px;
+    height: 150px;
+  }
+  
+  .custom-card i {
+    font-size: 2rem;
+    color: #555;
+  }
+  
