@@ -43,17 +43,7 @@
       <!-- Add more admin sidebar links here -->
     </ul>
     <div class="sidebar-footer">
-      <a @click="showLogoutPopup" class="sidebar-link logout-link"><i class="bi bi-box-arrow-right"></i>Logout</a>
-    </div>
-    
-    <!-- Logout Popup -->
-    <div v-if="showPopup" class="popup-overlay" @click.self="hideLogoutPopup">
-      <div class="popup-content">
-        <h3>Konfirmasi Logout</h3>
-        <p>Apakah Anda yakin ingin keluar?</p>
-        <button @click="logout" class="confirm-button">Ya</button>
-        <button @click="hideLogoutPopup" class="cancel-button">Tidak</button>
-      </div>
+      <a @click="logout" class="sidebar-link logout-link"><i class="bi bi-box-arrow-right"></i>Logout</a>
     </div>
   </aside>
 </template>
@@ -64,8 +54,7 @@ export default {
   data() {
     return {
       activeItem: '',
-      activeSubmenu: '',
-      showPopup: false
+      activeSubmenu: ''
     };
   },
   methods: {
@@ -75,16 +64,9 @@ export default {
     toggleSubmenu(item) {
       this.activeSubmenu = this.activeSubmenu === item ? '' : item;
     },
-    showLogoutPopup() {
-      this.showPopup = true;
-    },
-    hideLogoutPopup() {
-      this.showPopup = false;
-    },
     logout() {
       // Implement logout logic here
       console.log('Logging out...');
-      this.hideLogoutPopup();
     }
   }
 };
@@ -189,58 +171,5 @@ li {
 
 .logout-link {
   cursor: pointer;
-}
-
-/* Popup styles */
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000; 
-  animation: fadeIn 0.3s;
-}
-
-.popup-content {
-  background: #054fb0;
-  padding: 20px;
-  border-radius: 5px;
-  text-align: center;
-  animation: zoomIn 0.3s;
-}
-
-
-.confirm-button, .cancel-button {
-  margin: 10px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.confirm-button {
-  background-color: #1abc9c;
-  color: #fff;
-}
-
-.cancel-button {
-  background-color: #e74c3c;
-  color: #fff;
-}
-
-/* Animations */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes zoomIn {
-  from { transform: scale(0.5); }
-  to { transform: scale(1); }
 }
 </style>
