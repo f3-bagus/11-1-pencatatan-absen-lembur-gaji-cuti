@@ -2,6 +2,7 @@
 
 ## Project setup
 ```
+npm install -g @vue/cli
 npm install bootstrap@5.3.3 bootstrap-icons
 npm install vuex
 npm install vuex@next
