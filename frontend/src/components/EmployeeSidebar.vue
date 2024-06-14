@@ -32,10 +32,10 @@
 
 <script>
 export default {
-  name: 'Sidebar',
+  name: 'EmployeeSidebar',
 };
 </script>
 
 <style scoped>
-@import "./sidebarStyles.css";
+@import "./EmployeeSidebarStyles.css";
 </style>

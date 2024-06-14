@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import Dashboard from '../views/Dashboard.vue';
-import Leave from '../components/Leave.vue';
-import Payroll from '../components/Payroll.vue';
+import Dashboard from '../views/employees/Dashboard.vue';
+import Leave from '../views/employees/Leave.vue';
+import Payroll from '../views/employees/Payroll.vue';
 import AdminDashboard from '../views/admin/AdminDashboard.vue';
 import Karyawan from '../views/admin/Karyawan.vue';
 import DataJabatan from '../views/admin/DataJabatan.vue';
@@ -13,6 +13,8 @@ import Laporan from '../views/admin/Laporan.vue';
 import Pengaturan from '../views/admin/Pengaturan.vue';
 import Login from '../components/Login.vue';
 import Register from '../components/Register.vue'; // Add this import
+import EmployeeProfile from "../views/employees/EmployeeProfile.vue"
+import Notification from '../views/employees/Notification.vue';
 
 const routes = [
   {
@@ -30,6 +32,17 @@ const routes = [
     name: 'Payroll',
     component: Payroll,
   },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: EmployeeProfile
+  },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: Notification,
+  },
+
   {
     path: '/admin',
     name: 'AdminDashboard',

@@ -9,16 +9,16 @@
 </template>
 
 <script>
-import Navbar from './components/Navbar.vue';
-import Sidebar from './components/Sidebar.vue';
+import EmployeeNavbar from './components/EmployeeNavbar.vue';
+import EmployeeSidebar from './components/EmployeeSidebar.vue';
 import AdminNavbar from './components/AdminNavbar.vue';
 import AdminSidebar from './components/AdminSidebar.vue';
 
 export default {
   name: 'App',
   components: {
-    Navbar,
-    Sidebar,
+    EmployeeNavbar,
+    EmployeeSidebar,
     AdminNavbar,
     AdminSidebar,
   },
@@ -30,10 +30,10 @@ export default {
       return this.$route.path === '/login' || this.$route.path === '/register';
     },
     navbarComponent() {
-      return this.isAdminRoute ? 'AdminNavbar' : 'Navbar';
+      return this.isAdminRoute ? 'AdminNavbar' : 'EmployeeNavbar';
     },
     sidebarComponent() {
-      return this.isAdminRoute ? 'AdminSidebar' : 'Sidebar';
+      return this.isAdminRoute ? 'AdminSidebar' : 'EmployeeSidebar';
     },
   },
 };
