@@ -11,6 +11,8 @@ import LemburCuti from '../views/admin/LemburCuti.vue';
 import Gaji from '../views/admin/Gaji.vue';
 import Laporan from '../views/admin/Laporan.vue';
 import Pengaturan from '../views/admin/Pengaturan.vue';
+import Login from '../components/Login.vue';
+import Register from '../components/Register.vue'; // Add this import
 
 const routes = [
   {
@@ -72,6 +74,16 @@ const routes = [
     path: '/admin/pengaturan',
     name: 'Pengaturan',
     component: Pengaturan,
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: Login,
+  },
+  {
+    path: '/register', // Add this route
+    name: 'Register',
+    component: Register,
   },
   // Additional admin routes can go here
 ];

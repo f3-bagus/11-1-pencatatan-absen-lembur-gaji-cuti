@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <component :is="navbarComponent" />
-    <component :is="sidebarComponent" />
-    <div class="main-content">
+    <component v-if="!isAuthRoute" :is="navbarComponent" />
+    <component v-if="!isAuthRoute" :is="sidebarComponent" />
+    <div :class="{'main-content': !isAuthRoute}">
       <router-view />
     </div>
   </div>
@@ -25,6 +25,9 @@ export default {
   computed: {
     isAdminRoute() {
       return this.$route.path.startsWith('/admin');
+    },
+    isAuthRoute() {
+      return this.$route.path === '/login' || this.$route.path === '/register';
     },
     navbarComponent() {
       return this.isAdminRoute ? 'AdminNavbar' : 'Navbar';
