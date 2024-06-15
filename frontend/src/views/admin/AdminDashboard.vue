@@ -3,7 +3,7 @@
     <h1>Dashboard</h1>
     <p>Selamat datang di panel admin. Gunakan sidebar untuk menavigasi fitur admin.</p>
     
-    <div class="kartu-container" style="display: none;">
+    <div class="kartu-container">
       <div class="kartu jumlah-admin">
         <h2>Admin</h2>
         <p>2</p>
@@ -17,15 +17,15 @@
         <p>95%</p>
       </div>
       <div class="kartu data-lembur">
-        <h2>Data Lembur</h2>
-        <p>25 Jam</p>
+        <h2>Data Karyawan Lembur</h2>
+        <p>10 orang</p>
       </div>
       <div class="kartu data-cuti">
-        <h2>Data Cuti</h2>
-        <p>10 Orang</p>
+        <h2>Data Karyawan Cuti</h2>
+        <p>25 Orang</p>
       </div>
       <div class="kartu data-gaji">
-        <h2>Data Penggajian</h2>
+        <h2>Total Penggajian</h2>
         <p>Rp. 500,000,000</p>
       </div>
     </div>

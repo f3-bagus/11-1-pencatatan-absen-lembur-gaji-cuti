@@ -2,71 +2,77 @@
   <div class="gaji">
     <h1>Daftar Gaji Karyawan</h1>
     <div class="card">
-    <div class="top-bar">
-      <button @click="showModal = true" class="add-button">
-        <i class="bi bi-plus-circle"></i> Tambah Gaji
-      </button>
-      <div class="search-container">
-        <div class="search-icon-container">
-          <i class="bi bi-search search-icon"></i>
+      <div class="top-bar">
+        <button @click="showModal = true" class="add-button">
+          <i class="bi bi-plus-circle"></i> Tambah Gaji
+        </button>
+        <div class="search-container">
+          <div class="search-icon-container">
+            <i class="bi bi-search search-icon"></i>
+          </div>
+          <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
         </div>
-        <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input"/>
       </div>
-    </div>
-    <table class="gaji-table">
-      <thead>
-        <tr>
-          <th>Nama Karyawan</th>
-          <th>Periode</th>
-          <th>Gaji Pokok</th>
-          <th>Tunjangan</th>
-          <th>Potongan</th>
-          <th>Total Gaji</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="record in filteredRecords" :key="record.id">
-          <td>{{ record.nama }}</td>
-          <td>{{ record.periode }}</td>
-          <td>{{ formatCurrency(record.gajiPokok) }}</td>
-          <td>{{ formatCurrency(record.tunjangan) }}</td>
-          <td>{{ formatCurrency(record.potongan) }}</td>
-          <td>{{ formatCurrency(record.totalGaji) }}</td>
-        </tr>
-      </tbody>
-    </table>
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <span @click="showModal = false" class="close-button">&times;</span>
-        <h2>Tambah Gaji</h2>
-        <form @submit.prevent="submitForm">
-          <div class="form-group">
-            <input type="text" v-model="newRecord.nama" placeholder="Nama Karyawan" required />
-          </div>
-          <div class="form-group">
-            <input type="month" v-model="newRecord.periode" placeholder="Periode" required />
-          </div>
-          <div class="form-group">
-            <input type="number" v-model.number="newRecord.gajiPokok" placeholder="Gaji Pokok" required />
-          </div>
-          <div class="form-group">
-            <input type="number" v-model.number="newRecord.tunjangan" placeholder="Tunjangan" required />
-          </div>
-          <div class="form-group">
-            <input type="number" v-model.number="newRecord.potongan" placeholder="Potongan" required />
-          </div>
-          <div class="form-group">
-            <input type="number" v-model="calculatedTotalGaji" placeholder="Total Gaji" readonly />
-          </div>
-          <button type="submit" class="submit-button">Tambah</button>
-        </form>
-      </div>
+      <table class="gaji-table">
+        <thead>
+          <tr>
+            <th>Nama Karyawan</th>
+            <th>Periode</th>
+            <th>Gaji Pokok</th>
+            <th>Tunjangan</th>
+            <th>Potongan</th>
+            <th>Total Gaji</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="record in filteredRecords" :key="record.id">
+            <td>{{ record.nama }}</td>
+            <td>{{ record.periode }}</td>
+            <td>{{ formatCurrency(record.gajiPokok) }}</td>
+            <td>{{ formatCurrency(record.tunjangan) }}</td>
+            <td>{{ formatCurrency(record.potongan) }}</td>
+            <td>{{ formatCurrency(record.totalGaji) }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <div v-if="showModal" class="modal">
+        <div class="modal-content">
+          <span @click="showModal = false" class="close-button">&times;</span>
+          <h2>Tambah Gaji</h2>
+          <form @submit.prevent="submitForm">
+            <div class="form-group">
+              <input type="text" list="datalistOptions" id="exampleDataList" v-model="newRecord.nama"
+                placeholder="Nama Karyawan" required />
+              <datalist id="datalistOptions">
+                <option v-for="option in datalistOptions" :value="option.name" :key="option.id"></option>
+              </datalist>
+            </div>
+            <div class="form-group">
+              <input type="month" v-model="newRecord.periode" placeholder="Periode" required />
+            </div>
+            <div class="form-group">
+              <input type="number" v-model.number="newRecord.gajiPokok" placeholder="Gaji Pokok" required />
+            </div>
+            <div class="form-group">
+              <input type="number" v-model.number="newRecord.tunjangan" placeholder="Tunjangan" required />
+            </div>
+            <div class="form-group">
+              <input type="number" v-model.number="newRecord.potongan" placeholder="Potongan" required />
+            </div>
+            <div class="form-group">
+              <input type="number" v-model="calculatedTotalGaji" placeholder="Total Gaji" readonly />
+            </div>
+            <button type="submit" class="submit-button">Tambah</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from '../../services/axios';
+
 export default {
   name: 'Gaji',
   data() {
@@ -87,9 +93,13 @@ export default {
       ]
     };
   },
+  created() {
+    // Fetch data from API when component is created
+    this.fetchUserList();
+  },
   computed: {
     filteredRecords() {
-      return this.records.filter(record => 
+      return this.records.filter(record =>
         record.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         record.periode.includes(this.searchQuery)
       );
@@ -101,6 +111,17 @@ export default {
   methods: {
     formatCurrency(value) {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
+    },
+    // Method to fetch user list from API
+    async fetchUserList() {
+      try {
+        const response = await axios.get('http://localhost:3000/api/v1/user/users');
+        this.datalistOptions = response.data.data;
+console.log(response.data.data);
+      } catch (error) {
+        console.error('Error fetching user list:', error);
+        // Handle error as needed
+      }
     },
     addGaji() {
       this.showModal = true;
@@ -120,6 +141,7 @@ export default {
   font-family: 'Arial', sans-serif;
   background-color: #f0f4f7;
   padding: 20px;
+  width: 76vw;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -131,7 +153,7 @@ export default {
 }
 
 h1 {
-  font-size: 2em; 
+  font-size: 2em;
   color: #333;
   text-align: center;
   margin-bottom: 20px;

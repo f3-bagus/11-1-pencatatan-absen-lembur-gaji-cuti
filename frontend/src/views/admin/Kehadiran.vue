@@ -81,6 +81,7 @@ export default {
   font-family: 'Arial', sans-serif;
   background-color: #f0f4f7;
   padding: 20px;
+  width: 76vw;
   border-radius: 10px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
