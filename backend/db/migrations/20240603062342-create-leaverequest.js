@@ -28,7 +28,8 @@ module.exports = {
         type: Sequelize.DATE
       },
       status: {
-        type: Sequelize.ENUM('LATE', 'ONTIME', 'LEAVE')
+        defaultValue: "PENDING",
+        type: Sequelize.ENUM('PENDING', 'ACCEPTED', 'REJECTED')
       },
       createdAt: {
         allowNull: false,

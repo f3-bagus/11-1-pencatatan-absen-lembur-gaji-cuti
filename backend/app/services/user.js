@@ -36,13 +36,9 @@ const create = async (payload, isAdmin) => {
             name,
             address,
             phoneNumber,
-            role: isAdmin ? 'ADMIN': 'MEMBER',
+            privilege: isAdmin ? 'ADMIN': 'MEMBER',
             roleId
         });
-
-        // await NotificationService.create(user.id,{ title: 'Register Success', message: 'Selamat Datang !!' })
-        // await sendOtp(user, "verify");
-        // delete user.dataValues.verified;
 
         return user;
     } catch (err) {
