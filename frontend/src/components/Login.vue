@@ -22,26 +22,35 @@
   </template>
   
   <script>
-  export default {
-    data() {
-      return {
-        email: '',
-        password: '',
-      };
-    },
-    methods: {
-      handleLogin() {
-        // Placeholder for actual login logic
-        if (this.email === 'admin@example.com' && this.password === 'password') {
-          // Redirect to dashboard after successful login
-          this.$router.push({ name: 'Dashboard' });
-        } else {
-          alert('Invalid credentials');
+export default {
+  data() {
+    return {
+      email: '',
+      password: '',
+      users: [
+        { email: 'admin@example.com', password: 'password', role: 'admin' },
+        { email: 'employee@example.com', password: 'password', role: 'employee' }
+      ]
+    };
+  },
+  methods: {
+    handleLogin() {
+      const user = this.users.find(
+        user => user.email === this.email && user.password === this.password
+      );
+      if (user) {
+        if (user.role === 'admin') {
+          this.$router.push({ name: 'AdminDashboard' });
+        } else if (user.role === 'employee') {
+          this.$router.push({ name: 'EmployeeDashboard' });
         }
-      },
-    },
-  };
-  </script>
+      } else {
+        alert('Invalid credentials');
+      }
+    }
+  }
+};
+</script>
   
   <style scoped>
   body {
