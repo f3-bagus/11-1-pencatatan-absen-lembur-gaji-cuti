@@ -42,7 +42,7 @@ export default {
         if (user.role === 'admin') {
           this.$router.push({ name: 'AdminDashboard' });
         } else if (user.role === 'employee') {
-          this.$router.push({ name: 'EmployeeDashboard' });
+          this.$router.push({ name: 'Dashboard' });
         }
       } else {
         alert('Invalid credentials');
