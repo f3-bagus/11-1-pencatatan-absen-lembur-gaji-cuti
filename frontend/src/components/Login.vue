@@ -22,35 +22,50 @@
   </template>
   
   <script>
-export default {
-  data() {
-    return {
-      email: '',
-      password: '',
-      users: [
-        { email: 'admin@example.com', password: 'password', role: 'admin' },
-        { email: 'employee@example.com', password: 'password', role: 'employee' }
-      ]
-    };
-  },
-  methods: {
-    handleLogin() {
-      const user = this.users.find(
-        user => user.email === this.email && user.password === this.password
-      );
-      if (user) {
-        if (user.role === 'admin') {
-          this.$router.push({ name: 'AdminDashboard' });
-        } else if (user.role === 'employee') {
-          this.$router.push({ name: 'Dashboard' });
+  import axios from 'axios';
+
+  export default {
+    data() {
+      return {
+        email: '',
+        password: '',
+      };
+    },
+    methods: {
+    async handleLogin() {
+      try {
+        const response = await axios.post('http://localhost:3000/api/v1/user/login', {
+          email: this.email,
+          password: this.password,
+        }, 
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }});
+        console.log(response);
+        if (response.status===200) {
+          // Simpan token atau lakukan sesuatu dengan data respons
+          localStorage.setItem('token', response.data.data.token);
+          localStorage.setItem('role', response.data.data.privilege);
+          // Redirect ke dashboard setelah login berhasil
+          if (response.data.data.privilege === "ROOT" || response.data.data.privilege === "ADMIN") {
+            this.$router.push({ name: 'AdminDashboard' });
+          } else  {
+            this.$router.push({ name: 'Dashboard' });
+          }
+        } else {
+          alert('Invalid credentials');
         }
-      } else {
-        alert('Invalid credentials');
+      } catch (error) {
+        console.error('Login error:', error);
+        alert('An error occurred during login. Please try again.');
       }
-    }
-  }
-};
-</script>
+    },
+  },
+
+  };
+  </script>
+
   
   <style scoped>
   body {

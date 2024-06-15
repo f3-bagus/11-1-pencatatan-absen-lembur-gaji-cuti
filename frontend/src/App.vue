@@ -1,8 +1,8 @@
 <template>
   <div id="app">
-    <component v-if="!isAuthRoute" :is="navbarComponent" />
-    <component v-if="!isAuthRoute" :is="sidebarComponent" />
-    <div :class="{'main-content': !isAuthRoute}">
+    <component v-if="!isAuthRoute && !isAdminRegisterRoute" :is="navbarComponent" />
+    <component v-if="!isAuthRoute && !isAdminRegisterRoute" :is="sidebarComponent" />
+    <div :class="{'main-content': !isAuthRoute && !isAdminRegisterRoute}">
       <router-view />
     </div>
   </div>
@@ -26,14 +26,25 @@ export default {
     isAdminRoute() {
       return this.$route.path.startsWith('/admin');
     },
+    isAdminRegisterRoute() {
+      return this.$route.path === '/registerAdmin'; // Adjust to match your admin register route path
+    },
     isAuthRoute() {
       return this.$route.path === '/login' || this.$route.path === '/register';
     },
     navbarComponent() {
-      return this.isAdminRoute ? 'AdminNavbar' : 'EmployeeNavbar';
+      if (this.isAdminRegisterRoute) {
+        return null; // Return null to not render any navbar component
+      } else {
+        return this.isAdminRoute ? 'AdminNavbar' : 'EmployeeNavbar';
+      }
     },
     sidebarComponent() {
-      return this.isAdminRoute ? 'AdminSidebar' : 'EmployeeSidebar';
+      if (this.isAdminRegisterRoute) {
+        return null; // Return null to not render any sidebar component
+      } else {
+        return this.isAdminRoute ? 'AdminSidebar' : 'EmployeeSidebar';
+      }
     },
   },
 };

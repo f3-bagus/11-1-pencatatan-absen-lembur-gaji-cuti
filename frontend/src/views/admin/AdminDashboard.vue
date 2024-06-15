@@ -3,7 +3,7 @@
     <h1>Dashboard</h1>
     <p>Selamat datang di panel admin. Gunakan sidebar untuk menavigasi fitur admin.</p>
     
-    <div class="kartu-container">
+    <div class="kartu-container" style="display: none;">
       <div class="kartu jumlah-admin">
         <h2>Admin</h2>
         <p>2</p>

@@ -43,7 +43,9 @@
       <!-- Add more admin sidebar links here -->
     </ul>
     <div class="sidebar-footer">
-      <a @click="logout" class="sidebar-link logout-link"><i class="bi bi-box-arrow-right"></i>Logout</a>
+      <router-link to="/login" active-class="active-link">
+      <a class="sidebar-link logout-link"><i class="bi bi-box-arrow-right"></i>Logout</a>
+    </router-link>
     </div>
   </aside>
 </template>

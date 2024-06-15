@@ -12,7 +12,8 @@ import Gaji from '../views/admin/Gaji.vue';
 import Laporan from '../views/admin/Laporan.vue';
 import Pengaturan from '../views/admin/Pengaturan.vue';
 import Login from '../components/Login.vue';
-import Register from '../components/Register.vue'; // Add this import
+import Register from '../components/Register.vue';
+import RegisterAdmin from '../components/RegisterAdmin.vue';
 import EmployeeProfile from "../views/employees/EmployeeProfile.vue"
 import Notification from '../views/employees/Notification.vue';
 
@@ -94,9 +95,14 @@ const routes = [
     component: Login,
   },
   {
-    path: '/register', // Add this route
+    path: '/register', 
     name: 'Register',
     component: Register,
+  },
+  {
+    path: '/registerAdmin', 
+    name: 'RegisterAdmin',
+    component: RegisterAdmin,
   },
   // Additional admin routes can go here
 ];
