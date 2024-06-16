@@ -40,15 +40,19 @@
               <thead>
                 <tr>
                   <th scope="col">Hari/Tanggal</th>
-                  <th scope="col">Waktu Kehadiran</th>
-                  <th scope="col">Status Kehadiran</th>
+                  <th scope="col">Check In</th>
+                  <th scope="col">Status Check In</th>
+                  <th scope="col">Check Out</th>
+                  <th scope="col">Status Check Out</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="(entry, index) in attendanceList" :key="index">
                   <td>{{ entry.date }}</td>
-                  <td>{{ entry.time }}</td>
-                  <td>{{ entry.status }}</td>
+                  <td>{{ entry.checkInTime }}</td>
+                  <td>{{ entry.checkInStatus }}</td>
+                  <td>{{ entry.checkOutTime || '-' }}</td>
+                  <td>{{ entry.checkOutStatus || '-' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -70,15 +74,10 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Januari</td>
-                  <td>40</td>
+                <tr v-for="(month, index) in totalOvertimeByMonth" :key="index">
+                  <td>{{ month.name }}</td>
+                  <td>{{ month.totalOvertime }}</td>
                 </tr>
-                <tr>
-                  <td>Februari</td>
-                  <td>35</td>
-                </tr>
-                <!-- Tambahkan data lainnya di sini -->
               </tbody>
             </table>
           </div>
@@ -98,18 +97,52 @@ export default {
     ...mapGetters(['formattedTime', 'formattedDate', 'attendanceList']),
     buttonText() {
       return this.attendance.length % 2 === 0 ? 'Masuk' : 'Keluar';
+    },
+    totalOvertimeByMonth() {
+      const overtimeByMonth = {};
+
+      this.attendanceList.forEach(entry => {
+        if (entry.checkOutTime) {
+          const checkInTime = new Date(entry.date + ' ' + entry.checkInTime);
+          const checkOutTime = new Date(entry.date + ' ' + entry.checkOutTime);
+          const overtimeHours = Math.max(0, (checkOutTime - checkInTime) / (1000 * 60 * 60) - 8);
+
+          const monthYear = new Date(entry.date).toLocaleString('default', { month: 'long', year: 'numeric' });
+          if (!overtimeByMonth[monthYear]) {
+            overtimeByMonth[monthYear] = 0;
+          }
+          overtimeByMonth[monthYear] += overtimeHours;
+        }
+      });
+
+      return Object.keys(overtimeByMonth).map(month => ({
+        name: month,
+        totalOvertime: overtimeByMonth[month]
+      }));
     }
   },
   methods: {
     ...mapActions(['updateTime', 'addAttendance']),
     toggleAttendance() {
-      const action = this.attendance.length % 2 === 0 ? 'Masuk' : 'Keluar';
       const now = new Date();
       const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       const date = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       const status = this.getAttendanceStatus(now);
 
-      this.addAttendance({ date, time, status });
+      if (this.attendance.length % 2 === 0) {
+        this.addAttendance({
+          date,
+          checkInTime: time,
+          checkInStatus: status,
+          checkOutTime: '',
+          checkOutStatus: ''
+        });
+      } else {
+        const lastEntry = this.attendance[this.attendance.length - 1];
+        lastEntry.checkOutTime = time;
+        lastEntry.checkOutStatus = status;
+      }
+
       this.updateTime();
     },
     getAttendanceStatus(date) {
