@@ -20,7 +20,7 @@ app.get("/", (req, res) => {
 app.use("/api/v1", apiV1);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Menjalankan server pada port 3000
-app.listen(3000, () => {
-  console.log('Server berjalan pada http://localhost:3000');
+// Menjalankan server pada port 5565
+app.listen(5565, () => {
+  console.log('Server berjalan pada http://localhost:5565');
 });

@@ -3,18 +3,23 @@
     <h1>Laporan dan Analisis Karyawan</h1>
     <div class="card">
       <div class="top-bar">
-      <div class="search-container">
-        <div class="search-icon-container">
-          <i class="bi bi-search search-icon"></i>
+        <div class="left-controls">
+          <button @click="generateReport('pdf')" class="export-button">Export PDF</button>
         </div>
-        <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input"/>
-      </div>
+        <div class="search-container">
+          <div class="search-icon-container">
+            <i class="bi bi-search search-icon"></i>
+          </div>
+          <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
+        </div>
       </div>
       <!-- Report sections -->
       <div class="report-section">
-        <h4>Rekapitulasi Kehadiran Karyawan</h4>
         <table class="laporan-table">
           <thead>
+            <tr>
+              <th colspan="6" class="table-keterangan text-center">Rekapitulasi Kehadiran Karyawan</th>
+            </tr>
             <tr>
               <th>Nama Karyawan</th>
               <th>Tanggal</th>
@@ -38,9 +43,11 @@
       </div>
 
       <div class="report-section">
-        <h4>Rekapitulasi Lembur</h4>
         <table class="laporan-table">
           <thead>
+            <tr>
+              <th colspan="4" class="table-keterangan text-center">Rekapitulasi Lembur</th>
+            </tr>
             <tr>
               <th>Nama Karyawan</th>
               <th>Tanggal</th>
@@ -60,9 +67,11 @@
       </div>
 
       <div class="report-section">
-        <h4>Rekapitulasi Cuti</h4>
         <table class="laporan-table">
           <thead>
+            <tr>
+              <th colspan="5" class="table-keterangan text-center">Rekapitulasi Cuti</th>
+            </tr>
             <tr>
               <th>Nama Karyawan</th>
               <th>Tanggal Mulai</th>
@@ -84,9 +93,11 @@
       </div>
 
       <div class="report-section">
-        <h4>Rekapitulasi Penggajian</h4>
         <table class="laporan-table">
           <thead>
+            <tr>
+              <th colspan="6" class="table-keterangan text-center">Rekapitulasi Penggajian</th>
+            </tr>
             <tr>
               <th>Nama Karyawan</th>
               <th>Periode</th>
@@ -108,23 +119,14 @@
           </tbody>
         </table>
       </div>
-
-      <!-- Analysis section -->
-      <div class="analysis-section">
-        <h4>Analisis Performa Karyawan</h4>
-        <div class="charts-container">
-          <canvas id="performanceChart" class="chart"></canvas>
-          <canvas id="attendanceChart" class="chart"></canvas>
-        </div>
-      </div>
     </div>
   </div>
 </template>
 
 <script>
-import { ref, computed, onMounted } from 'vue';
-import * as d3 from 'd3';  // Assuming you're using D3.js for charts
-import Chart from 'chart.js/auto';  // Import Chart.js
+import { ref, computed } from 'vue';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
 
 export default {
   name: 'Laporan',
@@ -178,62 +180,69 @@ export default {
     };
 
     const generateReport = (format) => {
-      // Logic to generate PDF/Excel report
-      alert(`Generating ${format.toUpperCase()} report...`);
-    };
+  if (format === 'pdf') {
+    const doc = new jsPDF();
 
-    const drawCharts = () => {
-      // Use Chart.js to draw performance and attendance charts
+    doc.text('Laporan dan Analisis Karyawan', 10, 10);
 
-      // Performance chart
-      const performanceChartCtx = document.getElementById('performanceChart').getContext('2d');
-      new Chart(performanceChartCtx, {
-        type: 'bar',
-        data: {
-          labels: ['January', 'February', 'March', 'April', 'May', 'June', 'July'],
-          datasets: [{
-            label: 'Performance Score',
-            data: [65, 59, 80, 81, 56, 55, 40],
-            backgroundColor: 'rgba(255, 99, 132, 0.2)',
-            borderColor: 'rgba(255, 99, 132, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
+    const addTableWithHeader = (headerText, columns, data, startY) => {
+      doc.autoTable({
+        head: [[headerText]],
+        body: [[]],
+        startY: startY,
+        theme: 'plain',
+        headStyles: { halign: 'center', fillColor: [255, 255, 255] },
+        columnStyles: { 0: { halign: 'center' } },
       });
 
-      // Attendance chart
-      const attendanceChartCtx = document.getElementById('attendanceChart').getContext('2d');
-      new Chart(attendanceChartCtx, {
-        type: 'line',
-        data: {
-          labels: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-          datasets: [{
-            label: 'Attendance Rate (%)',
-            data: [85, 90, 88, 92, 87, 85, 90],
-            borderColor: 'rgba(54, 162, 235, 1)',
-            borderWidth: 1
-          }]
-        },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true
-            }
-          }
-        }
+      doc.autoTable({
+        head: [columns],
+        body: data,
+        startY: doc.lastAutoTable.finalY + 5,
+        theme: 'striped',
       });
     };
 
-    onMounted(() => {
-      drawCharts();
-    });
+    const attendanceData = filteredAttendanceRecords.value.map(record => [
+      record.nama,
+      record.tanggal,
+      record.status,
+      record.jamMasuk,
+      record.jamKeluar,
+      record.terlambat
+    ]);
+    addTableWithHeader('Keterangan Kehadiran', ['Nama Karyawan', 'Tanggal', 'Status', 'Jam Masuk', 'Jam Keluar', 'Terlambat'], attendanceData, doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 20);
+
+    const overtimeData = filteredOvertimeRecords.value.map(record => [
+      record.nama,
+      record.tanggal,
+      record.jumlahJam,
+      record.keterangan
+    ]);
+    addTableWithHeader('Keterangan Lembur', ['Nama Karyawan', 'Tanggal', 'Jumlah Jam', 'Keterangan'], overtimeData, doc.lastAutoTable.finalY + 15);
+
+    const leaveData = filteredLeaveRecords.value.map(record => [
+      record.nama,
+      record.tanggalMulai,
+      record.tanggalSelesai,
+      record.jenisCuti,
+      record.keterangan
+    ]);
+    addTableWithHeader('Keterangan Cuti', ['Nama Karyawan', 'Tanggal Mulai', 'Tanggal Selesai', 'Jenis Cuti', 'Keterangan'], leaveData, doc.lastAutoTable.finalY + 15);
+
+    const salaryData = filteredSalaryRecords.value.map(record => [
+      record.nama,
+      record.periode,
+      formatCurrency(record.gajiPokok),
+      formatCurrency(record.tunjangan),
+      formatCurrency(record.potongan),
+      formatCurrency(record.totalGaji)
+    ]);
+    addTableWithHeader('Keterangan Penggajian', ['Nama Karyawan', 'Periode', 'Gaji Pokok', 'Tunjangan', 'Potongan', 'Total Gaji'], salaryData, doc.lastAutoTable.finalY + 15);
+
+    doc.save('laporan_karyawan.pdf');
+  }
+};
 
     return {
       searchQuery,
@@ -243,48 +252,48 @@ export default {
       filteredSalaryRecords,
       formatCurrency,
       generateReport,
-      drawCharts
     };
-  }
+  },
 };
 </script>
 
-<style scoped>
+<style>
 .laporan {
-  font-family: 'Arial', sans-serif;
-  background-color: #f0f4f7;
   padding: 20px;
-  width: 76vw;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.laporan h1 {
-  font-size: 2em;
-  margin-bottom: 20px;
-  color: #333;
 }
 
 .card {
   background-color: #ffffff;
-  border-radius: 10px;
   padding: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-h1 {
-  font-size: 2em; 
-  color: #333;
-  text-align: center;
-  margin-bottom: 20px;
-  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .top-bar {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+}
+
+.left-controls {
+  display: flex;
+  align-items: center;
+}
+
+.export-button {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+
+.export-button:hover {
+  background-color: #45a049;
 }
 
 .search-container {
@@ -293,10 +302,13 @@ h1 {
 }
 
 .search-icon-container {
-  background-color: #f2f2f2;
-  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f1f1f1;
   border-top-left-radius: 4px;
   border-bottom-left-radius: 4px;
+  padding: 10px;
 }
 
 .search-icon {
@@ -310,12 +322,14 @@ h1 {
   border-left: none;
   border-top-right-radius: 4px;
   border-bottom-right-radius: 4px;
-  outline: none;
 }
 
 .report-section {
-  margin-bottom: 30px;
-  text-align: center;
+  margin-top: 20px;
+}
+
+.report-section h4 {
+  margin-bottom: 10px;
 }
 
 .laporan-table {
@@ -341,26 +355,6 @@ h1 {
 
 .laporan-table tbody tr:nth-child(even) {
   background-color: #f9f9f9;
-}
-
-.analysis-section {
-  margin-top: 40px;
-  text-align: center;
-}
-
-.charts-container {
-  display: flex;
-  justify-content: space-around;
-  flex-wrap: wrap;
-}
-
-.chart {
-  width: calc(50% - 20px);
-  height: 300px;
-  margin-bottom: 20px;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 
 @media (max-width: 768px) {
