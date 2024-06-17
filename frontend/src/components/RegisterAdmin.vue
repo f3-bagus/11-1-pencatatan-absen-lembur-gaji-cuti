@@ -59,7 +59,7 @@ export default {
         alert('Passwords do not match');
         return;
       }
-        const response = await axios.post('http://localhost:3000/api/v1/admin/register', {
+        const response = await axios.post('http://localhost:5565/api/v1/admin/register', {
           name: this.name,
           email: this.email,
           password: this.password,
