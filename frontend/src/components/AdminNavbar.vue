@@ -5,7 +5,9 @@
       <ul>
         <!-- Add more admin links here -->
       </ul>
-      <img src="/img/profil.png" alt="Profile Picture" class="profile-picture">
+      <router-link to="/admin/pengaturan" class="profile-link">
+        <img src="/img/profil.png" alt="Profile Picture" class="profile-picture">
+      </router-link>
     </div>
   </nav>
 </template>

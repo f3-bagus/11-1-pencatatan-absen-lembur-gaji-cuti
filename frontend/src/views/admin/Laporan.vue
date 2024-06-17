@@ -5,6 +5,7 @@
       <div class="top-bar">
         <div class="left-controls">
           <button @click="generateReport('pdf')" class="export-button">Export PDF</button>
+          <button @click="generateReport('csv')" class="export-button csv">Export CSV</button>
         </div>
         <div class="search-container">
           <div class="search-icon-container">
@@ -180,69 +181,86 @@ export default {
     };
 
     const generateReport = (format) => {
-  if (format === 'pdf') {
-    const doc = new jsPDF();
+      if (format === 'pdf') {
+        const doc = new jsPDF();
 
-    doc.text('Laporan dan Analisis Karyawan', 10, 10);
+        doc.text('Laporan dan Analisis Karyawan', 10, 10);
 
-    const addTableWithHeader = (headerText, columns, data, startY) => {
-      doc.autoTable({
-        head: [[headerText]],
-        body: [[]],
-        startY: startY,
-        theme: 'plain',
-        headStyles: { halign: 'center', fillColor: [255, 255, 255] },
-        columnStyles: { 0: { halign: 'center' } },
-      });
+        const addTableWithHeader = (headerText, columns, data, startY) => {
+          doc.autoTable({
+            head: [[headerText]],
+            body: [[]],
+            startY: startY,
+            theme: 'plain',
+            headStyles: { halign: 'center', fillColor: [255, 255, 255] },
+            columnStyles: { 0: { halign: 'center' } },
+          });
 
-      doc.autoTable({
-        head: [columns],
-        body: data,
-        startY: doc.lastAutoTable.finalY + 5,
-        theme: 'striped',
-      });
+          doc.autoTable({
+            head: [columns],
+            body: data,
+            startY: doc.lastAutoTable.finalY + 5,
+            theme: 'striped',
+          });
+        };
+
+        const attendanceData = filteredAttendanceRecords.value.map(record => [
+          record.nama,
+          record.tanggal,
+          record.status,
+          record.jamMasuk,
+          record.jamKeluar,
+          record.terlambat
+        ]);
+        addTableWithHeader('Keterangan Kehadiran', ['Nama Karyawan', 'Tanggal', 'Status', 'Jam Masuk', 'Jam Keluar', 'Terlambat'], attendanceData, doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 20);
+
+        const overtimeData = filteredOvertimeRecords.value.map(record => [
+          record.nama,
+          record.tanggal,
+          record.jumlahJam,
+          record.keterangan
+        ]);
+        addTableWithHeader('Keterangan Lembur', ['Nama Karyawan', 'Tanggal', 'Jumlah Jam', 'Keterangan'], overtimeData, doc.lastAutoTable.finalY + 15);
+
+        const leaveData = filteredLeaveRecords.value.map(record => [
+          record.nama,
+          record.tanggalMulai,
+          record.tanggalSelesai,
+          record.jenisCuti,
+          record.keterangan
+        ]);
+        addTableWithHeader('Keterangan Cuti', ['Nama Karyawan', 'Tanggal Mulai', 'Tanggal Selesai', 'Jenis Cuti', 'Keterangan'], leaveData, doc.lastAutoTable.finalY + 15);
+
+        const salaryData = filteredSalaryRecords.value.map(record => [
+          record.nama,
+          record.periode,
+          formatCurrency(record.gajiPokok),
+          formatCurrency(record.tunjangan),
+          formatCurrency(record.potongan),
+          formatCurrency(record.totalGaji)
+        ]);
+        addTableWithHeader('Keterangan Penggajian', ['Nama Karyawan', 'Periode', 'Gaji Pokok', 'Tunjangan', 'Potongan', 'Total Gaji'], salaryData, doc.lastAutoTable.finalY + 15);
+
+        doc.save('laporan_karyawan.pdf');
+      } else if (format === 'csv') {
+        const downloadCSV = (data, filename) => {
+          const csvContent = "data:text/csv;charset=utf-8," 
+            + data.map(e => Object.values(e).join(",")).join("\n");
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", filename);
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+
+        downloadCSV(filteredAttendanceRecords.value, "attendance_records.csv");
+        downloadCSV(filteredOvertimeRecords.value, "overtime_records.csv");
+        downloadCSV(filteredLeaveRecords.value, "leave_records.csv");
+        downloadCSV(filteredSalaryRecords.value, "salary_records.csv");
+      }
     };
-
-    const attendanceData = filteredAttendanceRecords.value.map(record => [
-      record.nama,
-      record.tanggal,
-      record.status,
-      record.jamMasuk,
-      record.jamKeluar,
-      record.terlambat
-    ]);
-    addTableWithHeader('Keterangan Kehadiran', ['Nama Karyawan', 'Tanggal', 'Status', 'Jam Masuk', 'Jam Keluar', 'Terlambat'], attendanceData, doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 20);
-
-    const overtimeData = filteredOvertimeRecords.value.map(record => [
-      record.nama,
-      record.tanggal,
-      record.jumlahJam,
-      record.keterangan
-    ]);
-    addTableWithHeader('Keterangan Lembur', ['Nama Karyawan', 'Tanggal', 'Jumlah Jam', 'Keterangan'], overtimeData, doc.lastAutoTable.finalY + 15);
-
-    const leaveData = filteredLeaveRecords.value.map(record => [
-      record.nama,
-      record.tanggalMulai,
-      record.tanggalSelesai,
-      record.jenisCuti,
-      record.keterangan
-    ]);
-    addTableWithHeader('Keterangan Cuti', ['Nama Karyawan', 'Tanggal Mulai', 'Tanggal Selesai', 'Jenis Cuti', 'Keterangan'], leaveData, doc.lastAutoTable.finalY + 15);
-
-    const salaryData = filteredSalaryRecords.value.map(record => [
-      record.nama,
-      record.periode,
-      formatCurrency(record.gajiPokok),
-      formatCurrency(record.tunjangan),
-      formatCurrency(record.potongan),
-      formatCurrency(record.totalGaji)
-    ]);
-    addTableWithHeader('Keterangan Penggajian', ['Nama Karyawan', 'Periode', 'Gaji Pokok', 'Tunjangan', 'Potongan', 'Total Gaji'], salaryData, doc.lastAutoTable.finalY + 15);
-
-    doc.save('laporan_karyawan.pdf');
-  }
-};
 
     return {
       searchQuery,
@@ -282,7 +300,17 @@ export default {
 }
 
 .export-button {
-  background-color: #4CAF50;
+  background-color: #ff0000;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 20px;
+}
+.csv {
+  background-color: #09750d;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -293,6 +321,9 @@ export default {
 }
 
 .export-button:hover {
+  background-color: #d04a4a;
+}
+.csv:hover {
   background-color: #45a049;
 }
 
@@ -363,3 +394,4 @@ export default {
   }
 }
 </style>
+

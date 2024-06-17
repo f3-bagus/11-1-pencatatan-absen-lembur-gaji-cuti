@@ -37,30 +37,6 @@
         <button type="submit" class="submit-button">Update Notifikasi</button>
       </form>
     </div>
-
-    <div class="pengaturan-section">
-      <h2>Pengaturan Umum</h2>
-      <form @submit.prevent="updateGeneralSettings">
-        <div class="form-group">
-          <label for="language">Bahasa</label>
-          <select id="language" v-model="generalSettings.language">
-            <option value="id">Bahasa Indonesia</option>
-            <option value="en">English</option>
-            <!-- Tambahkan opsi bahasa lainnya jika diperlukan -->
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="timezone">Zona Waktu</label>
-          <select id="timezone" v-model="generalSettings.timezone">
-            <option value="WIB">WIB</option>
-            <option value="WITA">WITA</option>
-            <option value="WIT">WIT</option>
-            <!-- Tambahkan opsi zona waktu lainnya jika diperlukan -->
-          </select>
-        </div>
-        <button type="submit" class="submit-button">Update Pengaturan</button>
-      </form>
-    </div>
   </div>
 </template>
 
@@ -77,25 +53,15 @@ export default {
       notifications: {
         email: false,
         sms: false
-      },
-      generalSettings: {
-        language: 'id',
-        timezone: 'WIB'
       }
     };
   },
   methods: {
     updateAdminAccount() {
-      // Tambahkan logika untuk memperbarui akun admin
       alert('Akun admin diperbarui');
     },
     updateNotifications() {
-      // Tambahkan logika untuk memperbarui pengaturan notifikasi
       alert('Pengaturan notifikasi diperbarui');
-    },
-    updateGeneralSettings() {
-      // Tambahkan logika untuk memperbarui pengaturan umum
-      alert('Pengaturan umum diperbarui');
     }
   }
 };
