@@ -16,17 +16,9 @@
         <h2>Data Kehadiran</h2>
         <p>95%</p>
       </div>
-      <div class="kartu data-lembur">
-        <h2>Data Karyawan Lembur</h2>
-        <p>10 orang</p>
-      </div>
       <div class="kartu data-cuti">
         <h2>Data Karyawan Cuti</h2>
         <p>25 Orang</p>
-      </div>
-      <div class="kartu data-gaji">
-        <h2>Total Penggajian</h2>
-        <p>Rp. 500,000,000</p>
       </div>
     </div>
   </div>
@@ -71,15 +63,17 @@ h1 {
   flex-wrap: wrap;
   gap: 20px;
   margin-top: 20px;
+  justify-content: center; /* Center the cards */
 }
 
 .kartu {
-  flex: 1 1 calc(33.333% - 20px);
+  flex: 1 1 calc(50% - 20px); /* Make the cards take up 50% of the container width */
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   text-align: center;
   color: #fff;
+  max-width: 400px; /* Optional: Limit the width of each card */
 }
 
 .kartu h2 {
@@ -103,15 +97,7 @@ h1 {
   background-color: #ffc107;
 }
 
-.data-lembur {
-  background-color: #17a2b8;
-}
-
 .data-cuti {
   background-color: #fd7e14;
-}
-
-.data-gaji {
-  background-color: #6f42c1;
 }
 </style>
