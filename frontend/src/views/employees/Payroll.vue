@@ -7,39 +7,10 @@
           <div class="card-body">
             <h5 class="card-title">Slip Gaji Terbaru</h5>
             <div class="pay-slip">
-              <p><strong>Nama:</strong> {{ latestPaySlip.name }}</p>
-              <p><strong>Tanggal:</strong> {{ latestPaySlip.date }}</p>
-              <p><strong>Jumlah:</strong> {{ latestPaySlip.amount }}</p>
-              <button class="btn btn-primary" @click="downloadPaySlip">Unduh Slip Gaji</button>
+              <p><strong>Nama :</strong> {{ latestPaySlip.name }}</p>
+              <p><strong>Tanggal :</strong> {{ latestPaySlip.date }}</p>
+              <p><strong>Gaji :</strong> {{ latestPaySlip.salary }}</p>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Baris untuk Ringkasan Gaji -->
-    <div class="row mb-4">
-      <div class="col-12 mb-3">
-        <div class="card h-100">
-          <div class="card-body">
-            <h5 class="card-title">Ringkasan Gaji</h5>
-            <table class="table table-responsive">
-              <thead>
-                <tr>
-                  <th scope="col">Bulan</th>
-                  <th scope="col">Gaji Pokok</th>
-                  <th scope="col">Tunjangan</th>
-                  <th scope="col">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(summary, index) in salarySummary" :key="index">
-                  <td>{{ summary.month }}</td>
-                  <td>{{ summary.basicSalary }}</td>
-                  <td>{{ summary.allowance }}</td>
-                  <td>{{ summary.total }}</td>
-                </tr>
-              </tbody>
-            </table>
           </div>
         </div>
       </div>
@@ -48,26 +19,35 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'Payroll',
   data() {
     return {
       latestPaySlip: {
-        name: 'John Doe',
-        date: 'June 2024',
-        amount: 'Rp 10,000,000',
+        name: '',
+        date: '',
+        salary: '',
       },
-      salarySummary: [
-        { month: 'Januari', basicSalary: 'Rp 8,000,000', allowance: 'Rp 2,000,000', total: 'Rp 10,000,000' },
-        { month: 'Februari', basicSalary: 'Rp 8,000,000', allowance: 'Rp 1,500,000', total: 'Rp 9,500,000' },
-        // Tambahkan data lainnya di sini
-      ],
     };
   },
+  created() {
+    this.fetchLatestPaySlip();
+  },
   methods: {
-    downloadPaySlip() {
-      // Logika untuk mengunduh slip gaji dapat ditambahkan di sini
-      alert('Mengunduh Slip Gaji...');
+    fetchLatestPaySlip() {
+      axios.get('/api/v1/user/payslips')
+        .then(response => {
+          // Mengambil data slip gaji terbaru dari response
+          const latestPaySlip = response.data[0]; // Misalnya mengambil data pertama dari array
+          this.latestPaySlip.name = latestPaySlip.name;
+          this.latestPaySlip.date = latestPaySlip.date;
+          this.latestPaySlip.salary = latestPaySlip.salary;
+        })
+        .catch(error => {
+          console.error('Error fetching latest pay slip:', error);
+        });
     },
   },
 };

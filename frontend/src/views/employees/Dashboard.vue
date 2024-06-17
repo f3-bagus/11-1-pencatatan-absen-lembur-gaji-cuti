@@ -22,12 +22,14 @@
           </div>
         </div>
         <div class="card flex-fill mt-3 mt-lg-3 mt-md-0">
-          <div class="card-body text-center">
-            <h5 class="card-title">Pengingat</h5>
-            <i class="bi bi-clock" style="font-size: 2rem;"></i>
-            <p class="card-text">Meeting pada jam 10:00 AM.</p>
-          </div>
-        </div>
+      <div class="card-body text-center">
+        <h5 class="card-title">Pengingat</h5>
+        <i class="bi bi-clock" style="font-size: 2rem;"></i>
+        <p class="card-text">Meeting pada jam 10:00 AM.</p>
+        <!-- Menggunakan router-link untuk navigasi -->
+        <router-link to="./notifications" class="btn btn-primary">Lihat Notifikasi</router-link>
+      </div>
+    </div>
       </div>
     </div>
     <!-- Baris untuk card Riwayat Kehadiran Terbaru -->
@@ -60,30 +62,6 @@
         </div>
       </div>
     </div>
-    <!-- Baris untuk tabel Total Lembur Bulanan -->
-    <div class="row mb-4">
-      <div class="col-12 mb-3">
-        <div class="card">
-          <div class="card-body">
-            <h5 class="card-title">Total Lembur Bulanan</h5>
-            <table class="table table-responsive">
-              <thead>
-                <tr>
-                  <th scope="col">Bulan</th>
-                  <th scope="col">Total Jam Lembur</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr v-for="(month, index) in totalOvertimeByMonth" :key="index">
-                  <td>{{ month.name }}</td>
-                  <td>{{ month.totalOvertime }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -97,28 +75,6 @@ export default {
     ...mapGetters(['formattedTime', 'formattedDate', 'attendanceList']),
     buttonText() {
       return this.attendance.length % 2 === 0 ? 'Masuk' : 'Keluar';
-    },
-    totalOvertimeByMonth() {
-      const overtimeByMonth = {};
-
-      this.attendanceList.forEach(entry => {
-        if (entry.checkOutTime) {
-          const checkInTime = new Date(entry.date + ' ' + entry.checkInTime);
-          const checkOutTime = new Date(entry.date + ' ' + entry.checkOutTime);
-          const overtimeHours = Math.max(0, (checkOutTime - checkInTime) / (1000 * 60 * 60) - 8);
-
-          const monthYear = new Date(entry.date).toLocaleString('default', { month: 'long', year: 'numeric' });
-          if (!overtimeByMonth[monthYear]) {
-            overtimeByMonth[monthYear] = 0;
-          }
-          overtimeByMonth[monthYear] += overtimeHours;
-        }
-      });
-
-      return Object.keys(overtimeByMonth).map(month => ({
-        name: month,
-        totalOvertime: overtimeByMonth[month]
-      }));
     }
   },
   methods: {
@@ -166,25 +122,5 @@ export default {
 </script>
 
 <style scoped>
-.card-title {
-  font-size: 1.25rem;
-  font-weight: 500;
-}
-
-.card-text {
-  font-size: 1rem;
-}
-
-.card.h-100 {
-  height: 100%;
-}
-
-@media (max-width: 768px) {
-  .mt-lg-3 {
-    margin-top: 1rem !important;
-  }
-  .mt-md-0 {
-    margin-top: 0 !important;
-  }
-}
+@import "./DashboardStyles.css";
 </style>
