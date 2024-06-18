@@ -27,7 +27,7 @@
         <i class="bi bi-clock" style="font-size: 2rem;"></i>
         <p class="card-text">Meeting pada jam 10:00 AM.</p>
         <!-- Menggunakan router-link untuk navigasi -->
-        <router-link to="./notifications" class="btn btn-primary">Lihat Notifikasi</router-link>
+        <router-link to="/notification" class="btn btn-primary">Lihat Notifikasi</router-link>
       </div>
     </div>
       </div>

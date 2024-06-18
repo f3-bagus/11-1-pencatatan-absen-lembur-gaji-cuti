@@ -23,9 +23,9 @@
       </li>
     </ul>
     <div class="logout">
-      <router-link to="/login" active-class="active-link">
+      <a href="#" @click="confirmLogout">
         <i class="bi bi-box-arrow-right"></i> Logout
-      </router-link>
+      </a>
     </div>
   </nav>
 </template>
@@ -33,6 +33,28 @@
 <script>
 export default {
   name: 'EmployeeSidebar',
+  methods: {
+    confirmLogout() {
+      swal({
+        title: "Ingin keluar dari halaman presensi anda?",
+        icon: "warning",
+        buttons: {
+          cancel: "No, stay",
+          confirm: {
+            text: "Yes, logout",
+            value: true,
+            visible: true,
+            className: "",
+            closeModal: true
+          }
+        }
+      }).then((willLogout) => {
+        if (willLogout) {
+          this.$router.push('/login');  // Redirect to the login page
+        }
+      });
+    }
+  }
 };
 </script>
 
