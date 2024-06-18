@@ -22,14 +22,14 @@
           </div>
         </div>
         <div class="card flex-fill mt-3 mt-lg-3 mt-md-0">
-      <div class="card-body text-center">
-        <h5 class="card-title">Pengingat</h5>
-        <i class="bi bi-clock" style="font-size: 2rem;"></i>
-        <p class="card-text">Meeting pada jam 10:00 AM.</p>
-        <!-- Menggunakan router-link untuk navigasi -->
-        <router-link to="/notification" class="btn btn-primary">Lihat Notifikasi</router-link>
-      </div>
-    </div>
+          <div class="card-body text-center">
+            <h5 class="card-title">Pengingat</h5>
+            <i class="bi bi-clock" style="font-size: 2rem;"></i>
+            <p class="card-text">Meeting pada jam 10:00 AM.</p>
+            <!-- Menggunakan router-link untuk navigasi -->
+            <router-link to="/notification" class="btn btn-primary">Lihat Notifikasi</router-link>
+          </div>
+        </div>
       </div>
     </div>
     <!-- Baris untuk card Riwayat Kehadiran Terbaru -->
@@ -49,12 +49,12 @@
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="(entry, index) in attendanceList" :key="index">
-                  <td>{{ entry.date }}</td>
-                  <td>{{ entry.checkInTime }}</td>
-                  <td>{{ entry.checkInStatus }}</td>
-                  <td>{{ entry.checkOutTime || '-' }}</td>
-                  <td>{{ entry.checkOutStatus || '-' }}</td>
+                <tr v-for="(entry, index) in formattedAttendanceList" :key="index">
+                  <td>{{entry.presenceDate}}</td>
+                  <td>{{ entry.checkIn }}</td>
+                  <td>{{ entry.Status }}</td>
+                  <td>{{ entry.checkOut || '-' }}</td>
+                  <td>{{ entry.Status || '-' }}</td>
                 </tr>
               </tbody>
             </table>
@@ -66,38 +66,61 @@
 </template>
 
 <script>
+import axios from '../../services/axios';
 import { mapState, mapGetters, mapActions } from 'vuex';
+import moment from 'moment';
 
 export default {
   name: 'Attendance',
+  data() {
+    return {
+      attendanceList: []
+    };
+  },
   computed: {
     ...mapState(['currentTime', 'attendance']),
-    ...mapGetters(['formattedTime', 'formattedDate', 'attendanceList']),
+    ...mapGetters(['formattedTime', 'formattedDate']),
     buttonText() {
       return this.attendance.length % 2 === 0 ? 'Masuk' : 'Keluar';
+    },
+    formattedAttendanceList() {
+      return this.attendanceList.map(entry => {
+        return {
+          ...entry,
+          presenceDate: moment(entry.presenceDate).format('DD/MM/YYYY'),
+          checkIn: moment(entry.checkIn).format('HH:mm:ss')
+        };
+      });
     }
   },
   methods: {
     ...mapActions(['updateTime', 'addAttendance']),
     toggleAttendance() {
       const now = new Date();
-      const time = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      const date = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      const time = this.formatTime(now);
+      const date = this.formatDate(now);
       const status = this.getAttendanceStatus(now);
 
-      if (this.attendance.length % 2 === 0) {
-        this.addAttendance({
-          date,
-          checkInTime: time,
-          checkInStatus: status,
-          checkOutTime: '',
-          checkOutStatus: ''
-        });
-      } else {
-        const lastEntry = this.attendance[this.attendance.length - 1];
-        lastEntry.checkOutTime = time;
-        lastEntry.checkOutStatus = status;
-      }
+      const newAttendance = {
+        date,
+        checkInTime: time,
+        checkInStatus: status,
+        checkOutTime: '',
+        checkOutStatus: ''
+      };
+
+      axios.post('api/v1/user/presence', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        this.addAttendance(response.data);
+        this.loadAttendanceList(); // Refresh the attendance list
+      })
+      .catch(error => {
+        console.error('Error during check-in:', error);
+      });
 
       this.updateTime();
     },
@@ -110,13 +133,47 @@ export default {
       } else {
         return 'Lembur';
       }
+    },
+    loadAttendanceList() {
+      axios.get('api/v1/user/presences', {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        this.attendanceList = response.data.data;
+        console.log(this.attendanceList);
+      })
+      .catch(error => {
+        console.error('Error loading attendance list:', error);
+      });
+    },
+    formatDate(date) {
+      return new Intl.DateTimeFormat('id-ID', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      }).format(date);
+    },
+    formatTime(date) {
+      return new Intl.DateTimeFormat('id-ID', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }).format(date);
+    },
+    formatDate(date) {
+      return moment(date).format('DD/MM/YYYY');
     }
   },
+  
   created() {
     this.updateTime();
     setInterval(() => {
       this.updateTime();
     }, 1000);
+    this.loadAttendanceList(); // Load attendance list on component creation
   }
 };
 </script>
