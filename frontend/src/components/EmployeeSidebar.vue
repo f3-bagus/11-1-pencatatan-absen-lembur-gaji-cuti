@@ -3,22 +3,22 @@
     <ul>
       <li>
         <router-link to="/" active-class="active-link">
-          <i class="bi bi-house-door"></i> Home
+          <i class="bi bi-house-door"></i> Dashboard
         </router-link>
       </li>
       <li>
         <router-link to="/leave" active-class="active-link">
-          <i class="bi bi-calendar"></i> Leave
+          <i class="bi bi-calendar"></i> Cuti
         </router-link>
       </li>
       <li>
         <router-link to="/payroll" active-class="active-link">
-          <i class="bi bi-cash-stack"></i> Payroll
+          <i class="bi bi-cash-stack"></i> Penggajian
         </router-link>
       </li>
       <li>
         <router-link to="/profile" active-class="active-link">
-          <i class="bi bi-person"></i> Profile
+          <i class="bi bi-person"></i> Profil
         </router-link>
       </li>
     </ul>

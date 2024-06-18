@@ -40,8 +40,8 @@ const routes = [
     component: EmployeeProfile
   },
   {
-    path: '/notifications',
-    name: 'Notifications',
+    path: '/notification',
+    name: 'Notification',
     component: Notification,
   },
 

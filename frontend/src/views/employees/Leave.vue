@@ -59,6 +59,7 @@
   </div>
 </template>
 
+
 <script>
 import axios from 'axios';
 
@@ -69,27 +70,57 @@ export default {
       startDate: '',
       endDate: '',
       reason: '',
-      leaveHistory: [],
-      nextLeaveId: 1,
+      leaveHistory: [
+        // Data dummy untuk contoh
+        {
+          leave_id: 1,
+          submission_date: '2024-06-01',
+          leave_type: 'Annual Leave',
+          start_date: '2024-06-01',
+          end_date: '2024-06-05',
+          reason: 'Liburan tahunan',
+          status: 'Disetujui',
+        },
+        {
+          leave_id: 2,
+          submission_date: '2024-06-10',
+          leave_type: 'Sick Leave',
+          start_date: '2024-06-10',
+          end_date: '2024-06-12',
+          reason: 'Sakit demam',
+          status: 'Menunggu persetujuan',
+        },
+      ],
+      nextLeaveId: 3,
     };
   },
-  created() {
-    this.fetchLeaveHistory();
-  },
   methods: {
-    submitLeave() {
+    async submitLeave() {
       const newLeave = {
-        leave_id: this.nextLeaveId++,
-        submission_date: new Date().toISOString().slice(0, 10),
         leave_type: this.leaveType,
         start_date: this.startDate,
         end_date: this.endDate,
         reason: this.reason,
         status: 'Menunggu persetujuan',
       };
-      // Simulasi pengajuan cuti dengan menambahkan data langsung ke leaveHistory
-      this.leaveHistory.push(newLeave);
-      this.resetForm();
+
+      try {
+        const response = await axios.post('/api/v1/user/leaves', newLeave, {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        // Assuming the API responds with the new leave object including an ID
+        newLeave.leave_id = response.data.leave_id;
+        newLeave.submission_date = response.data.submission_date;
+
+        this.leaveHistory.push(newLeave);
+        this.resetForm();
+      } catch (error) {
+        console.error('Error submitting leave:', error);
+        // Handle error accordingly, e.g., show a message to the user
+      }
     },
     resetForm() {
       this.leaveType = '';
@@ -101,19 +132,80 @@ export default {
       const date = new Date(dateString);
       return `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`;
     },
-    fetchLeaveHistory() {
-      axios.get('/api/v1/user/leaves')
-        .then(response => {
-          this.leaveHistory = response.data; // Mengisi leaveHistory dengan data dari API
-        })
-        .catch(error => {
-          console.error('Error fetching leave history:', error);
-        });
-    },
   },
 };
 </script>
 
+
 <style scoped>
-@import "./LeaveStyles.css"
+.leave-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+}
+
+.leave-application, .leave-history {
+  margin-bottom: 2em;
+}
+
+.leave-application h2, .leave-history h2 {
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5em;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.75em;
+  margin-top: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 0.75em;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1em;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.leave-history table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leave-history th, .leave-history td {
+  padding: 0.75em;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+.leave-history th {
+  background-color: #f2f2f2;
+}
+
+.date-inputs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.date-inputs > div {
+  width: calc(50% - 0.5em); /* Jarak 0.5em antara input */
+}
 </style>

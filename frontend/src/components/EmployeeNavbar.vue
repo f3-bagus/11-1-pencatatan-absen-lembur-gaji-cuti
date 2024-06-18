@@ -1,10 +1,10 @@
 <template>
   <nav class="navbar fixed-top">
     <div class="container-fluid">
-      <h3 class="navbar-brand">Logo</h3>
+      <img src="/img/Logo_Appsensi.png" alt="Logo" class="navbar-brand" style="height: 40px; width: 100px;">
       <div class="profile d-flex align-items-center">
-        <p class="mb-0 me-3" @click="goToProfile" style="cursor: pointer;">Annisa</p>
-        <div class="notifikasi position-relative" @click="goToNotifications" style="cursor: pointer;">
+        <p class="mb-0 me-3" @click="goToProfile" style="cursor: pointer;">User Employee</p>
+        <div class="notifikasi position-relative" @click="goToNotification" style="cursor: pointer;">
           <i class="bi bi-bell" style="font-size: 1.5rem; color: white;"></i>
           <span class="badge">3</span>
         </div>
@@ -20,8 +20,8 @@ export default {
     goToProfile() {
       this.$router.push('/profile');
     },
-    goToNotifications() {
-      this.$router.push('/notifications');
+    goToNotification() {
+      this.$router.push('/notification');
     }
   }
 };
