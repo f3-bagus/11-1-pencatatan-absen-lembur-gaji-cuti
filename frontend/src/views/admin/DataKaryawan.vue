@@ -3,9 +3,6 @@
     <h1>Data Karyawan</h1>
     <div class="card">
       <div class="top-bar">
-        <button @click="showModal = true" class="add-button">
-          <i class="bi bi-plus-circle"></i> Tambah Data Karyawan
-        </button>
         <div class="search-container">
           <div class="search-icon-container">
             <i class="bi bi-search search-icon"></i>
@@ -19,7 +16,6 @@
           <tr>
             <th>ID</th>
             <th>Nama</th>
-            <th>NIK</th>
             <th>Jabatan</th>
             <th>Email</th>
             <th>Nomor Telepon</th>
@@ -29,13 +25,12 @@
         <tbody>
           <tr v-for="karyawan in filteredKaryawan" :key="karyawan.id">
             <td>{{ karyawan.id }}</td>
-            <td>{{ karyawan.nama }}</td>
-            <td>{{ karyawan.nik }}</td>
-            <td>{{ karyawan.jabatan }}</td>
+            <td>{{ karyawan.name }}</td>
+            <td>{{ karyawan.JobRole.roleName }}</td>
             <td>{{ karyawan.email }}</td>
-            <td>{{ karyawan.nomorTelepon }}</td>
+            <td>{{ karyawan.phoneNumber }}</td>
             <td class="actions">
-              <button class="action-button edit-button" @click="editKaryawan(karyawan.id)">
+              <button class="action-button edit-button" @click="openEditModal(karyawan)">
                 <i class="bi bi-pencil-square"></i> Edit
               </button>
               <button class="action-button delete-button" @click="deleteKaryawan(karyawan.id)">
@@ -45,85 +40,96 @@
           </tr>
         </tbody>
       </table>
+    </div>
 
-      <div v-if="showModal" class="modal">
-        <div class="modal-content">
-          <span @click="showModal = false" class="close-button">&times;</span>
-          <h2>Tambah Karyawan</h2>
-          <form @submit.prevent="submitForm">
-            <div class="form-group">
-              <input type="text" id="namaKaryawan" v-model="newKaryawan.nama" placeholder="Nama Karyawan" required />
-            </div>
-            <div class="form-group">
-              <input type="text" id="nikKaryawan" v-model="newKaryawan.nik" placeholder="NIK" required />
-            </div>
-            <div class="form-group">
-              <input type="text" id="jabatanKaryawan" v-model="newKaryawan.jabatan" placeholder="Jabatan" required />
-            </div>
-            <div class="form-group">
-              <input type="email" id="emailKaryawan" v-model="newKaryawan.email" placeholder="Email" required />
-            </div>
-            <div class="form-group">
-              <input type="text" id="nomorTeleponKaryawan" v-model="newKaryawan.nomorTelepon" placeholder="Nomor Telepon" required />
-            </div>
-            <button type="submit" class="submit-button">Tambah</button>
-          </form>
+    <!-- Edit Modal -->
+    <div v-if="showEditModal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" @click="closeEditModal">&times;</span>
+        <h2>Edit Karyawan</h2>
+        <div class="form-group">
+          <label>Nama:</label>
+          <input type="text" v-model="editedKaryawan.name" />
         </div>
+        <div class="form-group">
+          <label>Jabatan:</label>
+          <input type="text" v-model="editedKaryawan.JobRole.roleName" />
+        </div>
+        <div class="form-group">
+          <label>Email:</label>
+          <input type="email" v-model="editedKaryawan.email" />
+        </div>
+        <div class="form-group">
+          <label>Nomor Telepon:</label>
+          <input type="text" v-model="editedKaryawan.phoneNumber" />
+        </div>
+        <button class="submit-button" @click="updateKaryawan">Update</button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from '../../services/axios';
+
 export default {
   name: 'DataKaryawan',
   data() {
     return {
       searchQuery: '',
-      showModal: false,
-      newKaryawan: {
-        nama: '',
-        nik: '',
-        jabatan: '',
+      showEditModal: false,
+      editedKaryawan: {
+        id: '',
+        name: '',
+        JobRole: {
+          roleName: ''
+        },
         email: '',
-        nomorTelepon: ''
+        phoneNumber: ''
       },
-      karyawanList: [
-        { id: 1, nama: 'Dewi Maharani', nik: '3374098101010007', jabatan: 'Frontend Developer', email: 'dewiimr283@gmail.com', nomorTelepon: '081234567890' },
-        { id: 2, nama: 'Annisa Aisyah', nik: '3374012340090003', jabatan: 'Frontend Developer', email: 'annisaaisyah@gmail.com', nomorTelepon: '082345678901' },
-        { id: 3, nama: 'Azyumi Azra', nik: '3374076540890008', jabatan: 'Frontend Developer', email: 'azyumiazraa@gmail.com', nomorTelepon: '082345678902' },
-        // Tambahkan data karyawan lainnya sesuai kebutuhan
-      ]
+      karyawanList: []
     };
   },
   computed: {
     filteredKaryawan() {
       return this.karyawanList.filter(karyawan =>
-        karyawan.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.nik.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.jabatan.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        karyawan.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        karyawan.JobRole.roleName.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         karyawan.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.nomorTelepon.toLowerCase().includes(this.searchQuery.toLowerCase())
+        karyawan.phoneNumber.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
     }
   },
   methods: {
-    addKaryawan() {
-      this.showModal = true;
+    async fetchKaryawanData() {
+      try {
+        const response = await axios.get('api/v1/user/users');
+        this.karyawanList = response.data.data;
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     },
-    submitForm() {
-      const newId = this.karyawanList.length ? Math.max(...this.karyawanList.map(k => k.id)) + 1 : 1;
-      this.karyawanList.push({ id: newId, ...this.newKaryawan });
-      this.newKaryawan = { nama: '', nik: '', jabatan: '', email: '', nomorTelepon: '' };
-      this.showModal = false;
+    openEditModal(karyawan) {
+      this.editedKaryawan = { ...karyawan, JobRole: { ...karyawan.JobRole } };
+      this.showEditModal = true;
     },
-    editKaryawan(id) {
-      alert('Edit karyawan with ID: ' + id);
+    closeEditModal() {
+      this.showEditModal = false;
+    },
+    updateKaryawan() {
+      const index = this.karyawanList.findIndex(k => k.id === this.editedKaryawan.id);
+      if (index !== -1) {
+        this.$set(this.karyawanList, index, { ...this.editedKaryawan });
+        this.closeEditModal();
+      }
     },
     deleteKaryawan(id) {
       this.karyawanList = this.karyawanList.filter(karyawan => karyawan.id !== id);
       alert('Deleted karyawan with ID: ' + id);
     }
+  },
+  mounted() {
+    this.fetchKaryawanData();
   }
 };
 </script>
@@ -164,24 +170,6 @@ h1 {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-}
-
-.add-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 8px 15px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background-color 0.3s ease;
-  max-width: 240px;
-}
-
-.add-button:hover {
-  background-color: #45a049;
 }
 
 .search-container {
