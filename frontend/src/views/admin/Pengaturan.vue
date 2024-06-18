@@ -5,36 +5,19 @@
     <div class="pengaturan-section">
       <h2>Pengaturan Akun Admin</h2>
       <form @submit.prevent="updateAdminAccount">
-        <div class="form-group">
+        <div class="form-group account">
           <label for="adminName">Nama Admin</label>
           <input type="text" id="adminName" v-model="adminAccount.name" placeholder="Masukkan nama admin" required />
         </div>
-        <div class="form-group">
+        <div class="form-group account">
           <label for="adminEmail">Email Admin</label>
           <input type="email" id="adminEmail" v-model="adminAccount.email" placeholder="Masukkan email admin" required />
         </div>
-        <div class="form-group">
+        <div class="form-group account">
           <label for="adminPassword">Password Baru</label>
           <input type="password" id="adminPassword" v-model="adminAccount.password" placeholder="Masukkan password baru" />
         </div>
         <button type="submit" class="submit-button">Update Akun</button>
-      </form>
-    </div>
-
-    <div class="pengaturan-section">
-      <h2>Pengaturan Notifikasi</h2>
-      <form @submit.prevent="updateNotifications">
-        <div class="form-group">
-          <label>
-            <input type="checkbox" v-model="notifications.email" /> Email Notifikasi
-          </label>
-        </div>
-        <div class="form-group">
-          <label>
-            <input type="checkbox" v-model="notifications.sms" /> SMS Notifikasi
-          </label>
-        </div>
-        <button type="submit" class="submit-button">Update Notifikasi</button>
       </form>
     </div>
   </div>
@@ -50,19 +33,12 @@ export default {
         email: '',
         password: ''
       },
-      notifications: {
-        email: false,
-        sms: false
-      }
     };
   },
   methods: {
     updateAdminAccount() {
       alert('Akun admin diperbarui');
     },
-    updateNotifications() {
-      alert('Pengaturan notifikasi diperbarui');
-    }
   }
 };
 </script>
@@ -84,7 +60,7 @@ export default {
 }
 
 h1 {
-  font-size: 2em; 
+  font-size: 2em;
   color: #333;
   text-align: center;
   margin-bottom: 20px;
@@ -104,20 +80,20 @@ h1 {
   margin-bottom: 15px;
 }
 
-.form-group {
+.account {
   margin-bottom: 15px;
 }
 
-.form-group label {
+.account label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
 }
 
-.form-group input[type="text"],
-.form-group input[type="email"],
-.form-group input[type="password"],
-.form-group select {
+.account input[type="text"],
+.account input[type="email"],
+.account input[type="password"],
+.account select {
   width: 100%;
   padding: 10px;
   border: 1px solid #ccc;

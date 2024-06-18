@@ -43,14 +43,16 @@
       <!-- Add more admin sidebar links here -->
     </ul>
     <div class="sidebar-footer">
-      <router-link to="/login" active-class="active-link">
-      <a class="sidebar-link logout-link"><i class="bi bi-box-arrow-right"></i>Logout</a>
-    </router-link>
+      <a class="sidebar-link logout-link" @click="logout">
+        <i class="bi bi-box-arrow-right"></i>Logout
+      </a>
     </div>
   </aside>
 </template>
 
 <script>
+import swal from 'sweetalert';
+
 export default {
   name: 'AdminSidebar',
   data() {
@@ -67,8 +69,34 @@ export default {
       this.activeSubmenu = this.activeSubmenu === item ? '' : item;
     },
     logout() {
-      // Implement logout logic here
-      console.log('Logging out...');
+      swal({
+        title: "Apakah Anda yakin?",
+        text: "Anda akan keluar dari panel admin.",
+        icon: "warning",
+        buttons: {
+          cancel: {
+            text: "Batal",
+            value: null,
+            visible: true,
+            className: "swal-button--cancel",
+            closeModal: true,
+          },
+          confirm: {
+            text: "Ya, keluar",
+            value: true,
+            visible: true,
+            className: "swal-button--confirm",
+            closeModal: true,
+          }
+        },
+        dangerMode: true,
+      }).then((willLogout) => {
+        if (willLogout) {
+          // Implement actual logout logic here
+          console.log('Logging out...');
+          this.$router.push('/login');
+        }
+      });
     }
   }
 };
@@ -173,5 +201,42 @@ li {
 
 .logout-link {
   cursor: pointer;
+}
+
+.swal-button--confirm {
+  background-color: #1abc9c;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+.swal-button--cancel {
+  background-color: #e74c3c;
+  border-radius: 5px;
+  padding: 10px 20px;
+  font-size: 1rem;
+}
+
+.swal-modal {
+  border-radius: 10px;
+}
+
+.swal-title {
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.swal-text {
+  color: #555;
+  font-size: 1rem;
+}
+
+.swal-footer {
+  text-align: center;
+}
+
+.swal-footer .swal-button-container {
+  display: inline-block;
+  margin: 0 5px;
 }
 </style>

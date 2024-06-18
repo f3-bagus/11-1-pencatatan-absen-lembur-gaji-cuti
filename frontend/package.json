@@ -16,6 +16,7 @@
     "d3": "^7.9.0",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
+    "sweetalert": "^2.1.2",
     "vue": "^3.2.13",
     "vue-cal": "^4.8.1",
     "vue-router": "^4.3.3",

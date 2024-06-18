@@ -1,34 +1,39 @@
 <template>
   <div class="lemburcuti-page">
-      <h1>Daftar Lembur dan Cuti</h1>
+    <h1>Daftar Lembur dan Cuti</h1>
     <div class="card">
       <div class="top-bar">
         <div class="search-container">
           <div class="search-icon-container">
             <i class="bi bi-search search-icon"></i>
           </div>
-          <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input"/>
+          <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
         </div>
       </div>
       <table class="lemburcuti-table">
-      <thead>
-        <tr>
-          <th>Nama Karyawan</th>
-          <th>Tanggal</th>
-          <th>Jenis</th>
-          <th>Keterangan</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="record in filteredRecords" :key="record.id">
-          <td>{{ record.nama }}</td>
-          <td>{{ record.tanggal }}</td>
-          <td :class="getJenisClass(record.jenis)">{{ record.jenis }}</td>
-          <td>{{ record.keterangan }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
+        <thead>
+          <tr>
+            <th>Nama Karyawan</th>
+            <th>Tanggal</th>
+            <th>Jenis</th>
+            <th>Keterangan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="record in filteredRecords" :key="record.id">
+            <td>{{ record.nama }}</td>
+            <td>{{ record.tanggal }}</td>
+            <td :class="getJenisClass(record.jenis)">{{ record.jenis }}</td>
+            <td>{{ record.keterangan }}</td>
+            <td>
+              <button class="action-button accept-button">Terima</button>
+              <button class="action-button reject-button">Tolak</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
@@ -82,7 +87,7 @@ export default {
 }
 
 h1 {
-  font-size: 2em; 
+  font-size: 2em;
   color: #333;
   text-align: center;
   margin-bottom: 20px;
@@ -158,5 +163,24 @@ h1 {
 .jenis-cuti {
   color: orange;
   font-weight: bold;
+}
+
+.action-button {
+  padding: 5px 10px;
+  margin: 2px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.accept-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.reject-button {
+  background-color: #f44336;
+  color: white;
 }
 </style>

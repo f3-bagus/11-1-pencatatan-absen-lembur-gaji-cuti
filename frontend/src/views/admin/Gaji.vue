@@ -182,6 +182,7 @@ h1 {
   border-radius: 5px;
   display: flex;
   align-items: center;
+  max-width: 160px;
 }
 
 .add-button i {

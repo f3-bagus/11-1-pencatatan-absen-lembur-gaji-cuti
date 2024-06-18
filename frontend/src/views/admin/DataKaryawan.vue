@@ -2,76 +2,75 @@
   <div class="data-karyawan">
     <h1>Data Karyawan</h1>
     <div class="card">
-    <div class="top-bar">
-      <button @click="showModal = true" class="add-button">
-        <i class="bi bi-plus-circle"></i> Tambah Data Karyawan
-      </button>
-      <div class="search-container">
-        <div class="search-icon-container">
-          <i class="bi bi-search search-icon"></i>
+      <div class="top-bar">
+        <button @click="showModal = true" class="add-button">
+          <i class="bi bi-plus-circle"></i> Tambah Data Karyawan
+        </button>
+        <div class="search-container">
+          <div class="search-icon-container">
+            <i class="bi bi-search search-icon"></i>
+          </div>
+          <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
         </div>
-        <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
+      </div>
+
+      <table class="karyawan-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama</th>
+            <th>NIK</th>
+            <th>Jabatan</th>
+            <th>Email</th>
+            <th>Nomor Telepon</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="karyawan in filteredKaryawan" :key="karyawan.id">
+            <td>{{ karyawan.id }}</td>
+            <td>{{ karyawan.nama }}</td>
+            <td>{{ karyawan.nik }}</td>
+            <td>{{ karyawan.jabatan }}</td>
+            <td>{{ karyawan.email }}</td>
+            <td>{{ karyawan.nomorTelepon }}</td>
+            <td class="actions">
+              <button class="action-button edit-button" @click="editKaryawan(karyawan.id)">
+                <i class="bi bi-pencil-square"></i> Edit
+              </button>
+              <button class="action-button delete-button" @click="deleteKaryawan(karyawan.id)">
+                <i class="bi bi-trash"></i> Hapus
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div v-if="showModal" class="modal">
+        <div class="modal-content">
+          <span @click="showModal = false" class="close-button">&times;</span>
+          <h2>Tambah Karyawan</h2>
+          <form @submit.prevent="submitForm">
+            <div class="form-group">
+              <input type="text" id="namaKaryawan" v-model="newKaryawan.nama" placeholder="Nama Karyawan" required />
+            </div>
+            <div class="form-group">
+              <input type="text" id="nikKaryawan" v-model="newKaryawan.nik" placeholder="NIK" required />
+            </div>
+            <div class="form-group">
+              <input type="text" id="jabatanKaryawan" v-model="newKaryawan.jabatan" placeholder="Jabatan" required />
+            </div>
+            <div class="form-group">
+              <input type="email" id="emailKaryawan" v-model="newKaryawan.email" placeholder="Email" required />
+            </div>
+            <div class="form-group">
+              <input type="text" id="nomorTeleponKaryawan" v-model="newKaryawan.nomorTelepon" placeholder="Nomor Telepon" required />
+            </div>
+            <button type="submit" class="submit-button">Tambah</button>
+          </form>
+        </div>
       </div>
     </div>
-
-    <table class="karyawan-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nama</th>
-          <th>NIK</th>
-          <th>Jabatan</th>
-          <th>Departemen</th>
-          <th>Email</th>
-          <th>Nomor Telepon</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="karyawan in filteredKaryawan" :key="karyawan.id">
-          <td>{{ karyawan.id }}</td>
-          <td>{{ karyawan.nama }}</td>
-          <td>{{ karyawan.nik }}</td>
-          <td>{{ karyawan.jabatan }}</td>
-          <td>{{ karyawan.departemen }}</td>
-          <td>{{ karyawan.email }}</td>
-          <td>{{ karyawan.nomorTelepon }}</td>
-          <td class="actions">
-            <i @click="viewDetail(karyawan.id)" class="bi bi-info-circle text-primary action-icon"></i>
-            <i @click="deleteKaryawan(karyawan.id)" class="bi bi-trash text-danger action-icon"></i>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <span @click="showModal = false" class="close-button">&times;</span>
-        <h2>Tambah Karyawan</h2>
-        <form @submit.prevent="submitForm">
-          <div class="form-group">
-            <input type="text" id="namaKaryawan" v-model="newKaryawan.nama" placeholder="Nama Karyawan" required />
-          </div>
-          <div class="form-group">
-            <input type="text" id="nikKaryawan" v-model="newKaryawan.nik" placeholder="NIK" required />
-          </div>
-          <div class="form-group">
-            <input type="text" id="jabatanKaryawan" v-model="newKaryawan.jabatan" placeholder="Jabatan" required />
-          </div>
-          <div class="form-group">
-            <input type="text" id="departemenKaryawan" v-model="newKaryawan.departemen" placeholder="Departemen" required />
-          </div>
-          <div class="form-group">
-            <input type="email" id="emailKaryawan" v-model="newKaryawan.email" placeholder="Email" required />
-          </div>
-          <div class="form-group">
-            <input type="text" id="nomorTeleponKaryawan" v-model="newKaryawan.nomorTelepon" placeholder="Nomor Telepon" required />
-          </div>
-          <button type="submit" class="submit-button">Tambah</button>
-        </form>
-      </div>
-    </div>
-  </div>
   </div>
 </template>
 
@@ -86,14 +85,13 @@ export default {
         nama: '',
         nik: '',
         jabatan: '',
-        departemen: '',
         email: '',
         nomorTelepon: ''
       },
       karyawanList: [
-        { id: 1, nama: 'Dewi Maharani', nik: '3374098101010007', jabatan: 'Frontend Developer', departemen: 'Developers', email: 'dewiimr283@gmail.com', nomorTelepon: '081234567890' },
-        { id: 2, nama: 'Annisa Aisyah', nik: '3374012340090003', jabatan: 'Frontend Developer', departemen: 'Developers', email: 'annisaaisyah@gmail.com', nomorTelepon: '082345678901' },
-        { id: 3, nama: 'Azyumi Azra', nik: '3374076540890008', jabatan: 'Frontend Developer', departemen: 'Developers', email: 'azyumiazraa@gmail.com', nomorTelepon: '082345678902' },
+        { id: 1, nama: 'Dewi Maharani', nik: '3374098101010007', jabatan: 'Frontend Developer', email: 'dewiimr283@gmail.com', nomorTelepon: '081234567890' },
+        { id: 2, nama: 'Annisa Aisyah', nik: '3374012340090003', jabatan: 'Frontend Developer', email: 'annisaaisyah@gmail.com', nomorTelepon: '082345678901' },
+        { id: 3, nama: 'Azyumi Azra', nik: '3374076540890008', jabatan: 'Frontend Developer', email: 'azyumiazraa@gmail.com', nomorTelepon: '082345678902' },
         // Tambahkan data karyawan lainnya sesuai kebutuhan
       ]
     };
@@ -104,7 +102,6 @@ export default {
         karyawan.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         karyawan.nik.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         karyawan.jabatan.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.departemen.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         karyawan.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         karyawan.nomorTelepon.toLowerCase().includes(this.searchQuery.toLowerCase())
       );
@@ -117,11 +114,11 @@ export default {
     submitForm() {
       const newId = this.karyawanList.length ? Math.max(...this.karyawanList.map(k => k.id)) + 1 : 1;
       this.karyawanList.push({ id: newId, ...this.newKaryawan });
-      this.newKaryawan = { nama: '', nik: '', jabatan: '', departemen: '', email: '', nomorTelepon: '' };
+      this.newKaryawan = { nama: '', nik: '', jabatan: '', email: '', nomorTelepon: '' };
       this.showModal = false;
     },
-    viewDetail(id) {
-      alert('View details for ID: ' + id);
+    editKaryawan(id) {
+      alert('Edit karyawan with ID: ' + id);
     },
     deleteKaryawan(id) {
       this.karyawanList = this.karyawanList.filter(karyawan => karyawan.id !== id);
@@ -172,7 +169,7 @@ h1 {
 .add-button {
   background-color: #4CAF50;
   color: white;
-  padding: 5px 15px;
+  padding: 8px 15px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
@@ -180,6 +177,7 @@ h1 {
   align-items: center;
   gap: 5px;
   transition: background-color 0.3s ease;
+  max-width: 240px;
 }
 
 .add-button:hover {
@@ -230,12 +228,31 @@ h1 {
 
 .actions {
   display: flex;
+  flex-direction: column;
   gap: 10px;
+  align-items: center; /* Center align items horizontally */
 }
 
-.action-icon {
+.action-button {
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 14px;
+  display: inline-flex; /* Change to inline-flex to make width fit-content work */
+  align-items: center;
+  justify-content: center; /* Center the text and icon horizontally */
+  width: 100px; /* Set a fixed width for both buttons */
+}
+
+.edit-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
 }
 
 .modal {

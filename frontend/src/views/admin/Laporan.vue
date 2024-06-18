@@ -277,14 +277,35 @@ export default {
 
 <style>
 .laporan {
+  font-family: 'Arial', sans-serif;
+  background-color: #f0f4f7;
   padding: 20px;
+  width: 76vw;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.laporan h1 {
+  font-size: 2em;
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: bold
 }
 
 .card {
   background-color: #ffffff;
   padding: 20px;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+  font-size: 2em; 
+  color: #333;
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: 600;
 }
 
 .top-bar {
@@ -309,21 +330,17 @@ export default {
   cursor: pointer;
   margin-right: 20px;
 }
-.csv {
+
+.export-button.csv {
+  white-space: nowrap;
   background-color: #09750d;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-right: 20px;
 }
 
 .export-button:hover {
   background-color: #d04a4a;
 }
-.csv:hover {
+
+.export-button.csv:hover {
   background-color: #45a049;
 }
 
@@ -394,4 +411,3 @@ export default {
   }
 }
 </style>
-

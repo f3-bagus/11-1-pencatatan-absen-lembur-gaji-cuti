@@ -2,52 +2,56 @@
   <div class="data-jabatan">
     <h1>Data Jabatan</h1>
     <div class="card">
-    <div class="top-bar">
-      <button @click="showModal = true" class="add-button">
-        <i class="bi bi-plus-circle"></i> Tambah Data Jabatan
-      </button>
-      <div class="search-container">
-        <div class="search-icon-container">
-          <i class="bi bi-search search-icon"></i>
-        </div>
-        <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
-      </div>
-    </div>
-
-    <table class="jabatan-table">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nama Jabatan</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="jabatan in filteredJabatan" :key="jabatan.id">
-          <td>{{ jabatan.id }}</td>
-          <td>{{ jabatan.nama }}</td>
-          <td class="actions">
-            <i @click="viewDetail(jabatan.id)" class="bi bi-info-circle text-primary action-icon"></i>
-            <i @click="deleteJabatan(jabatan.id)" class="bi bi-trash text-danger action-icon"></i>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-
-    <div v-if="showModal" class="modal">
-      <div class="modal-content">
-        <span @click="showModal = false" class="close-button">&times;</span>
-        <h2>Tambah Jabatan</h2>
-        <form @submit.prevent="submitForm">
-          <div class="form-group">
-            <label for="namaJabatan">Nama Jabatan:</label>
-            <input type="text" id="namaJabatan" v-model="newJabatanNama" required />
+      <div class="top-bar">
+        <button @click="showModal = true" class="add-button">
+          <i class="bi bi-plus-circle"></i> Tambah Data Jabatan
+        </button>
+        <div class="search-container">
+          <div class="search-icon-container">
+            <i class="bi bi-search search-icon"></i>
           </div>
-          <button type="submit" class="submit-button">Tambah</button>
-        </form>
+          <input type="text" v-model="searchQuery" placeholder="Search..." class="search-input" />
+        </div>
+      </div>
+
+      <table class="jabatan-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nama Jabatan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="jabatan in filteredJabatan" :key="jabatan.id">
+            <td>{{ jabatan.id }}</td>
+            <td>{{ jabatan.nama }}</td>
+            <td class="actions">
+              <button class="edit-button" @click="editJabatan(jabatan.id)">
+                <i class="bi bi-pencil-square"></i> Edit
+              </button>
+              <button class="delete-button" @click="deleteJabatan(jabatan.id)">
+                <i class="bi bi-trash"></i> Hapus
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div v-if="showModal" class="modal">
+        <div class="modal-content">
+          <span @click="showModal = false" class="close-button">&times;</span>
+          <h2>Tambah Jabatan</h2>
+          <form @submit.prevent="submitForm">
+            <div class="form-group">
+              <label for="namaJabatan">Nama Jabatan:</label>
+              <input type="text" id="namaJabatan" v-model="newJabatanNama" required />
+            </div>
+            <button type="submit" class="submit-button">Tambah</button>
+          </form>
+        </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
@@ -67,7 +71,7 @@ export default {
         { id: 5, nama: 'Sekretaris' },
         { id: 6, nama: 'Bendahara' },
         { id: 7, nama: 'Pemasaran' },
-        // Add more positions as needed
+        // Tambahkan data jabatan lainnya sesuai kebutuhan
       ]
     };
   },
@@ -83,17 +87,17 @@ export default {
       this.showModal = true;
     },
     submitForm() {
-      const newId = this.jabatanList.length ? Math.max(this.jabatanList.map(j => j.id)) + 1 : 1;
+      const newId = this.jabatanList.length ? Math.max(...this.jabatanList.map(j => j.id)) + 1 : 1;
       this.jabatanList.push({ id: newId, nama: this.newJabatanNama });
       this.newJabatanNama = '';
       this.showModal = false;
     },
-    viewDetail(id) {
-      alert('View details for ID: ' + id);
+    editJabatan(id) {
+      alert('Edit jabatan with ID: ' + id);
     },
     deleteJabatan(id) {
       this.jabatanList = this.jabatanList.filter(jabatan => jabatan.id !== id);
-      alert('Deleted position with ID: ' + id);
+      alert('Deleted jabatan with ID: ' + id);
     }
   }
 };
@@ -140,7 +144,7 @@ h1 {
 .add-button {
   background-color: #4CAF50;
   color: white;
-  padding: 5px 15px;
+  padding: 8px 15px;
   border: none;
   cursor: pointer;
   border-radius: 5px;
@@ -148,6 +152,7 @@ h1 {
   align-items: center;
   gap: 5px;
   transition: background-color 0.3s ease;
+  max-width: 240px;
 }
 
 .add-button:hover {
@@ -198,12 +203,43 @@ h1 {
 
 .actions {
   display: flex;
-  gap: 10px;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center; /* Center align items horizontally */
 }
 
-.action-icon {
+.edit-button,
+.delete-button {
+  padding: 8px 15px; /* Adjust padding as needed for your design */
+  border: none;
+  border-radius: 5px;
   cursor: pointer;
-  font-size: 18px;
+  font-size: 14px;
+  display: inline-flex; /* Change to inline-flex to make width fit-content work */
+  align-items: center;
+  width: 130px; /* Set a fixed width for both buttons */
+  justify-content: center; /* Center the text and icon horizontally */
+  text-align: center; /* Center align text */
+}
+
+.edit-button i,
+.delete-button i {
+  margin-right: 5px;
+}
+
+.edit-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.edit-button i,
+.delete-button i {
+  margin-right: 5px;
 }
 
 .modal {
