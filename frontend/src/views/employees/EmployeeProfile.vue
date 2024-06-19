@@ -5,7 +5,7 @@
         <div class="card h-100">
           <div class="card-body text-center">
             <h5 class="card-title">Profil Karyawan</h5>
-            <img src="https://via.placeholder.com/150" class="rounded-circle mb-3" alt="Profil Karyawan">
+            <i class="bi bi-person-circle" style="font-size: 150px; color: #6c757d;"></i>
             <p class="card-text">Nama: {{ profile.name }}</p>
             <p class="card-text">Posisi: {{ profile.position }}</p>
             <p class="card-text">Email: {{ profile.email }}</p>
@@ -23,9 +23,9 @@ export default {
   data() {
     return {
       profile: {
-        name: 'Nama Karyawan',
-        position: 'Posisi',
-        email: 'email@domain.com',
+        name: 'Fikri',
+        position: 'Frontend Developer',
+        email: 'fikri@gmail.com',
         phone: '08123456789'
       }
     };
