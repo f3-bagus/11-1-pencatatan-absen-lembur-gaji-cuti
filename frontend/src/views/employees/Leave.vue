@@ -43,6 +43,7 @@
   </div>
 </template>
 
+
 <script>
 import axios from '../../services/axios.js';
 
@@ -100,6 +101,76 @@ export default {
 };
 </script>
 
+
 <style scoped>
-@import "./LeaveStyles.css"
+.leave-management {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2em;
+}
+
+.leave-application, .leave-history {
+  margin-bottom: 2em;
+}
+
+.leave-application h2, .leave-history h2 {
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5em;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5em;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 0.75em;
+  margin-top: 0.5em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  display: block;
+  width: 100%;
+  padding: 0.75em;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 1em;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.leave-history table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.leave-history th, .leave-history td {
+  padding: 0.75em;
+  text-align: left;
+  border-bottom: 1px solid #ccc;
+}
+
+.leave-history th {
+  background-color: #f2f2f2;
+}
+
+.date-inputs {
+  display: flex;
+  justify-content: space-between;
+}
+
+.date-inputs > div {
+  width: calc(50% - 0.5em); /* Jarak 0.5em antara input */
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar fixed-top">
     <div class="container-fluid">
-      <h3 class="navbar-brand">Logo</h3>
+      <img src="/img/Logo_Appsensi.png" alt="Logo" class="navbar-brand" style="height: 40px; width: 100px;">
       <div class="profile d-flex align-items-center">
         <p class="mb-0 me-3" @click="goToProfile" style="cursor: pointer;">{{userInfo.name ? userInfo.name : "NO NAME"}}</p>
         <div class="notifikasi position-relative" @click="goToNotifications" style="cursor: pointer;">
@@ -17,15 +17,6 @@
 import { mapState } from 'vuex';
 
 export default {
-  // data() {
-  //   let profileName = localStorage.getItem('name');
-  //   if (!profileName || profileName === "")
-  //     profileName = "NO NAME";
-
-  //   return {
-  //     profileName
-  //   };
-  // },
   computed: {
     ...mapState(['userInfo', 'notifications'])
   },
@@ -34,8 +25,8 @@ export default {
     goToProfile() {
       this.$router.push('/profile');
     },
-    goToNotifications() {
-      this.$router.push('/notifications');
+    goToNotification() {
+      this.$router.push('/notification');
     }
   }
 };

@@ -53,7 +53,6 @@
     </div>
   </div>
 </template>
-
 <script>
 import axios from '../../services/axios.js';
 import { mapState, mapGetters, mapActions } from 'vuex';
@@ -113,7 +112,6 @@ export default {
   }
 };
 </script>
-
 <style scoped>
 @import "./DashboardStyles.css";
 </style>

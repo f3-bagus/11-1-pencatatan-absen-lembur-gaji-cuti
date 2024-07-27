@@ -1,11 +1,16 @@
 .navbar {
   padding: 10px 20px;
-  background-color: #1C558E;
+  background-color: #4f85ba;
 }
 
 .navbar-brand {
   color: white;
   margin: 10px;
+}
+
+.navbar-brand img {
+  height: 40px; /* Adjusted height for the logo */
+  width: auto;
 }
 
 .profile {

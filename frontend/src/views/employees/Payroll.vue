@@ -17,6 +17,34 @@
         </div>
       </div>
     </div>
+    <!-- Baris untuk Ringkasan Gaji -->
+    <div class="row mb-4">
+      <div class="col-12 mb-3">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Ringkasan Gaji</h5>
+            <table class="table table-responsive">
+              <thead>
+                <tr>
+                  <th scope="col">Bulan</th>
+                  <th scope="col">Gaji Pokok</th>
+                  <th scope="col">Tunjangan</th>
+                  <th scope="col">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="(summary, index) in salarySummary" :key="index">
+                  <td>{{ summary.month }}</td>
+                  <td>{{ summary.basicSalary }}</td>
+                  <td>{{ summary.allowance }}</td>
+                  <td>{{ summary.total }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 

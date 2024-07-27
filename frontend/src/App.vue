@@ -30,21 +30,24 @@ export default {
       return this.$route.path.startsWith('/admin');
     },
     isAdminRegisterRoute() {
-      return this.$route.path === '/registerAdmin'; // Adjust to match your admin register route path
+      return this.$route.path === '/registerAdmin'; // Sesuaikan dengan path register admin Anda
     },
     isAuthRoute() {
       return this.$route.path === '/login' || this.$route.path === '/register';
     },
+    isForgotPasswordRoute() {
+      return this.$route.path === '/lupaSandi';
+    },
     navbarComponent() {
-      if (this.isAdminRegisterRoute) {
-        return null; // Return null to not render any navbar component
+      if (this.isAdminRegisterRoute || this.isForgotPasswordRoute) {
+        return null; // Tidak ada navbar untuk halaman register admin atau forgot password
       } else {
         return this.isAdminRoute ? 'AdminNavbar' : 'EmployeeNavbar';
       }
     },
     sidebarComponent() {
-      if (this.isAdminRegisterRoute) {
-        return null; // Return null to not render any sidebar component
+      if (this.isAdminRegisterRoute || this.isForgotPasswordRoute) {
+        return null; // Tidak ada sidebar untuk halaman register admin atau forgot password
       } else {
         return this.isAdminRoute ? 'AdminSidebar' : 'EmployeeSidebar';
       }

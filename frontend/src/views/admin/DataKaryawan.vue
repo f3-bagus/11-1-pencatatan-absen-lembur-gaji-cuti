@@ -43,7 +43,7 @@
           </tr>
         </tbody>
       </table>
-
+      
       <div v-if="_showModal" class="modal">
         <div class="modal-content">
           <span @click="closeModal" class="close-button">&times;</span>
@@ -78,6 +78,7 @@
             <button type="submit" class="submit-button">{{ _showModal === 1 ? "Tambah" : "Ubah" }}</button>
           </form>
         </div>
+        <button class="submit-button" @click="updateKaryawan">Update</button>
       </div>
     </div>
   </div>
@@ -189,6 +190,9 @@ export default {
 
       return this.karyawanForm.privilege;
     }
+  },
+  mounted() {
+    this.fetchKaryawanData();
   }
 };
 </script>
@@ -229,24 +233,6 @@ h1 {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-}
-
-.add-button {
-  background-color: #4CAF50;
-  color: white;
-  padding: 8px 15px;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background-color 0.3s ease;
-  max-width: 240px;
-}
-
-.add-button:hover {
-  background-color: #45a049;
 }
 
 .search-container {
