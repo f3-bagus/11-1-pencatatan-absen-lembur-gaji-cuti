@@ -15,20 +15,18 @@
           <tr>
             <th>Nama Karyawan</th>
             <th>Tanggal</th>
-            <th>Status</th>
             <th>Jam Masuk</th>
             <th>Jam Keluar</th>
-            <th>Terlambat</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="kehadiran in filteredKehadiran" :key="kehadiran.id">
-            <td>{{ kehadiran.nama }}</td>
-            <td>{{ kehadiran.tanggal }}</td>
-            <td :class="getStatusClass(kehadiran.status)">{{ kehadiran.status }}</td>
-            <td>{{ kehadiran.jamMasuk }}</td>
-            <td>{{ kehadiran.jamKeluar }}</td>
-            <td :class="getTerlambatClass(kehadiran.terlambat)">{{ kehadiran.terlambat }}</td>
+            <td>{{ kehadiran.User?.name }}</td>
+            <td>{{ kehadiran.presenceDate }}</td>
+            <td>{{ kehadiran.checkIn }}</td>
+            <td>{{ kehadiran.checkOut }}</td>
+            <td :class="'fw-bold ' + getStatusColor(kehadiran.status)">{{ kehadiran.status }}</td>
           </tr>
         </tbody>
       </table>
@@ -37,6 +35,8 @@
 </template>
 
 <script>
+import axios from '../../services/axios.js';
+
 export default {
   name: 'Kehadiran',
   data() {
@@ -50,27 +50,56 @@ export default {
         { id: 5, nama: 'Kevin Farrell', tanggal: '2024-06-01', status: 'Hadir', jamMasuk: '08:20', jamKeluar: '17:30', terlambat: 'Yes' },
         { id: 6, nama: 'Moh Holik', tanggal: '2024-06-01', status: 'Hadir', jamMasuk: '08:00', jamKeluar: '17:30', terlambat: 'No' },
         // Add more attendance records as needed
-      ]
+      ],
+      presences: []
     };
   },
   computed: {
     filteredKehadiran() {
-      return this.kehadiranList.filter(kehadiran => 
-        kehadiran.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        kehadiran.tanggal.includes(this.searchQuery.toLowerCase()) ||
-        kehadiran.status.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        kehadiran.jamMasuk.includes(this.searchQuery.toLowerCase()) ||
-        kehadiran.jamKeluar.includes(this.searchQuery.toLowerCase()) ||
-        kehadiran.terlambat.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      return this.presences.filter((item) => (this.findObjectValues(item, this.searchQuery)))
     }
   },
+  created() {
+    axios.get('/api/v1/admin/presenceAll').then((res) => {
+      const data = res.data?.data;
+
+      let len = data.length;
+      for (let i = 0; i < len; i++) {
+        data[i].presenceDate = new Date(data[i].presenceDate).toLocaleDateString();
+        data[i].checkIn = new Date(data[i].checkIn).toLocaleTimeString();
+        data[i].checkOut = new Date(data[i].checkOut).toLocaleTimeString();
+      }
+
+      this.presences = data;
+    }).catch((err) => {
+      console.error(err);
+    })
+  },
   methods: {
-    getStatusClass(status) {
-      return status === 'Hadir' ? 'status-hadir' : 'status-absent';
+    getStatusColor(status) {
+      switch (status) {
+        case 'ONTIME':
+          return 'text-success';
+        case 'LATE':
+          return 'text-secondary';
+        default:
+          return 'text-danger';
+      }
     },
-    getTerlambatClass(terlambat) {
-      return terlambat === 'Yes' ? 'terlambat-yes' : 'terlambat-no';
+    findObjectValues(object, value) {
+      for (const _values of Object.values(object)) {
+        if (!_values)
+          continue;
+        
+        if (typeof(_values) === 'object' && _values.constructor.name === 'Object')
+          if (this.findObjectValues(_values, value))
+            return true;
+
+        if (String(_values).toLowerCase().includes(value.toLocaleLowerCase()))
+          return true;
+      }
+      
+      return false;
     }
   }
 };
@@ -159,25 +188,5 @@ h1 {
 
 .kehadiran-table tr:nth-child(even) {
   background-color: #f9f9f9;
-}
-
-.status-hadir {
-  color: green;
-  font-weight: bold;
-}
-
-.status-absent {
-  color: red;
-  font-weight: bold;
-}
-
-.terlambat-yes {
-  color: red;
-  font-weight: bold;
-}
-
-.terlambat-no {
-  color: green;
-  font-weight: bold;
 }
 </style>

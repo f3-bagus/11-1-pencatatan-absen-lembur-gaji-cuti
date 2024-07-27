@@ -14,21 +14,25 @@
         <thead>
           <tr>
             <th>Nama Karyawan</th>
-            <th>Tanggal</th>
-            <th>Jenis</th>
-            <th>Keterangan</th>
+            <th>Tanggal Request</th>
+            <th>Mulai</th>
+            <th>Sampai</th>
+            <th>Status</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="record in filteredRecords" :key="record.id">
-            <td>{{ record.nama }}</td>
-            <td>{{ record.tanggal }}</td>
-            <td :class="getJenisClass(record.jenis)">{{ record.jenis }}</td>
-            <td>{{ record.keterangan }}</td>
+            <td>{{ record.User?.name }}</td>
+            <td>{{ new Date(record.requestDate).toLocaleString() }}</td>
+            <td>{{ new Date(record.startDate).toLocaleDateString() }}</td>
+            <td>{{ new Date(record.endDate).toLocaleDateString() }}</td>
+            <td :class="'fw-bold ' + getStatusColor(record.status)">{{ record.status }}</td>
             <td>
-              <button class="action-button accept-button">Terima</button>
-              <button class="action-button reject-button">Tolak</button>
+              <div v-if="record.status === 'PENDING'">
+                <button class="action-button accept-button" @click="confirmLeaveReq($event, record.id, true)">Terima</button>
+                <button class="action-button reject-button" @click="confirmLeaveReq($event, record.id, false)">Tolak</button>
+              </div>
             </td>
           </tr>
         </tbody>
@@ -38,34 +42,74 @@
 </template>
 
 <script>
+import axios from '../../services/axios.js';
+
 export default {
   name: 'LemburCuti',
   data() {
     return {
       searchQuery: '',
-      records: [
-        { id: 1, nama: 'Dewi Maharani', tanggal: '2024-06-01', jenis: 'Lembur', keterangan: 'Lembur tambahan di akhir pekan' },
-        { id: 2, nama: 'Annisa Aisyah', tanggal: '2024-06-02', jenis: 'Cuti', keterangan: 'Cuti untuk acara keluarga' },
-        { id: 3, nama: 'Azyumi Azra', tanggal: '2024-06-02', jenis: 'Lembur', keterangan: 'Lembur tambahan di akhir pekan' },
-        // Tambahkan data lembur dan cuti lainnya sesuai kebutuhan
-      ]
+      records: []
     };
   },
   computed: {
     filteredRecords() {
-      return this.records.filter(record => 
-        record.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        record.tanggal.includes(this.searchQuery.toLowerCase()) ||
-        record.jenis.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        record.keterangan.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      return this.records.filter((item) => (this.findObjectValues(item, this.searchQuery)))
     }
   },
   methods: {
-    getJenisClass(jenis) {
-      return jenis === 'Lembur' ? 'jenis-lembur' : 'jenis-cuti';
+    confirmLeaveReq(e, id, res) {
+      if (e.target.sleep)
+        return;
+      e.target.sleep = true;
+
+      try {
+        const status = res ? 'ACCEPTED' : 'REJECTED';
+        axios.post('/api/v1/admin/leaves/' + id, { status }).then((res) => {
+          const data = res.data?.data;
+          const index = this.records.findIndex((item) => (item.id === data.id));
+  
+          this.records[index].status = data.status;
+        });
+      } catch (err) {
+        console.error(err);
+        alert(err.message);
+      }
+
+      delete e.target.sleep;
+    },
+    getStatusColor(status) {
+      switch (status) {
+        case 'ACCEPTED':
+          return 'text-success';
+        case 'REJECTED':
+          return 'text-danger';
+        default:
+          return undefined;
+      }
+    },
+    findObjectValues(object, value) {
+      for (const _values of Object.values(object)) {
+        if (!_values)
+          continue;
+        
+        if (typeof(_values) === 'object' && _values.constructor.name === 'Object')
+          if (this.findObjectValues(_values, value))
+            return true;
+
+        if (String(_values).toLowerCase().includes(value.toLocaleLowerCase()))
+          return true;
+      }
+      
+      return false;
     }
-  }
+  },
+  created() {
+    axios.get('/api/v1/admin/leaves').then((res) => {
+      const data = res.data.data;
+      this.records = data;
+    });
+  },
 };
 </script>
 
@@ -153,16 +197,6 @@ h1 {
 
 .lemburcuti-table tr:nth-child(even) {
   background-color: #f9f9f9;
-}
-
-.jenis-lembur {
-  color: blue;
-  font-weight: bold;
-}
-
-.jenis-cuti {
-  color: orange;
-  font-weight: bold;
 }
 
 .action-button {

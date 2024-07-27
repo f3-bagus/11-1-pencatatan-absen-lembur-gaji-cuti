@@ -31,9 +31,12 @@
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+
 export default {
   name: 'EmployeeSidebar',
   methods: {
+    ...mapActions(['clearUserInfo']),
     confirmLogout() {
       swal({
         title: "Ingin keluar dari halaman presensi anda?",
@@ -50,6 +53,7 @@ export default {
         }
       }).then((willLogout) => {
         if (willLogout) {
+          this.clearUserInfo();
           this.$router.push('/login');  // Redirect to the login page
         }
       });

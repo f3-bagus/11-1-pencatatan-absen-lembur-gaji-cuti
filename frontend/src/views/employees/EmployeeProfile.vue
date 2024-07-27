@@ -5,11 +5,11 @@
         <div class="card h-100">
           <div class="card-body text-center">
             <h5 class="card-title">Profil Karyawan</h5>
-            <img src="https://via.placeholder.com/150" class="rounded-circle mb-3" alt="Profil Karyawan">
-            <p class="card-text">Nama: {{ profile.name }}</p>
-            <p class="card-text">Posisi: {{ profile.position }}</p>
-            <p class="card-text">Email: {{ profile.email }}</p>
-            <p class="card-text">Telepon: {{ profile.phone }}</p>
+            <img :src="userInfo.image" class="rounded-circle mb-3" alt="Profil Karyawan">
+            <p class="card-text">Nama: {{ userInfo.name }}</p>
+            <p class="card-text">Posisi: {{ typeof(userInfo.JobRole?.roleName) === "string" ? userInfo.JobRole?.roleName : "-" }}</p>
+            <p class="card-text">Email: {{ userInfo.email }}</p>
+            <p class="card-text">Telepon: {{ userInfo.phoneNumber }}</p>
           </div>
         </div>
       </div>
@@ -18,17 +18,16 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import state from '../../store/index';
+
 export default {
   name: 'Profile',
-  data() {
-    return {
-      profile: {
-        name: 'Nama Karyawan',
-        position: 'Posisi',
-        email: 'email@domain.com',
-        phone: '08123456789'
-      }
-    };
+  computed: {
+    ...mapState(['userInfo'])
+  },
+  async created() {
+    state.commit('fetchUserInfo');
   }
 };
 </script>

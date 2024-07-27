@@ -1,20 +1,12 @@
 import axios from "axios";
 
 const instance = axios.create({
-  baseURL: "http://localhost:3000/",
+  baseURL: "http://localhost:5565",
 });
-
-const handleRemoveToken = async () => {
-  try {
-    await localStorage.removeItem('token');
-  } catch (error) {
-    throw error;
-  }
-};
 
 instance.interceptors.request.use(
   async (config) => {
-    const token = await localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     if (token && config.headers) {
       config.headers.Authorization = "Bearer " + token;
     }
@@ -25,14 +17,15 @@ instance.interceptors.request.use(
   }
 );
 
-instance.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      handleRemoveToken();
-    }
-    return Promise.reject(error);
-  }
-);
+// instance.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response) {
+//       localStorage.removeItem('token');
+//       // location.reload();
+//     }
+//     return Promise.reject(error);
+//   }
+// );
 
 export default instance;

@@ -26,7 +26,7 @@ module.exports = {
       encryptedPassword,
       phoneNumber: "082112345678",
       privilege: user.privilege ? user.privilege : "MEMBER",
-      roleId: 1,
+      roleId: 2,
       createdAt: timestamp,
       updatedAt: timestamp,
     }))

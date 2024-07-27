@@ -3,8 +3,8 @@
     <h1>Daftar Gaji Karyawan</h1>
     <div class="card">
       <div class="top-bar">
-        <button @click="showModal = true" class="add-button">
-          <i class="bi bi-plus-circle"></i> Tambah Gaji
+        <button @click="_showModal = true" class="add-button">
+          <i class="bi bi-plus-circle"></i> Generate Gaji
         </button>
         <div class="search-container">
           <div class="search-icon-container">
@@ -19,48 +19,34 @@
             <th>Nama Karyawan</th>
             <th>Periode</th>
             <th>Gaji Pokok</th>
-            <th>Tunjangan</th>
+            <th>Bonus Lembur</th>
             <th>Potongan</th>
             <th>Total Gaji</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="record in filteredRecords" :key="record.id">
-            <td>{{ record.nama }}</td>
-            <td>{{ record.periode }}</td>
-            <td>{{ formatCurrency(record.gajiPokok) }}</td>
-            <td>{{ formatCurrency(record.tunjangan) }}</td>
-            <td>{{ formatCurrency(record.potongan) }}</td>
-            <td>{{ formatCurrency(record.totalGaji) }}</td>
+            <td>{{ record.User?.name }}</td>
+            <td>{{ new Date(record.periodStart).toLocaleDateString() + " - " + new Date(record.periodEnd).toLocaleDateString() }}</td>
+            <td>{{ formatCurrency(record.salary) }}</td>
+            <td>{{ formatCurrency(record.overtimeBonus) }}</td>
+            <td>{{ formatCurrency(record.deduction) }}</td>
+            <td>{{ formatCurrency(record.netWorth) }}</td>
           </tr>
         </tbody>
       </table>
-      <div v-if="showModal" class="modal">
+      <div v-if="_showModal" class="modal">
         <div class="modal-content">
-          <span @click="showModal = false" class="close-button">&times;</span>
-          <h2>Tambah Gaji</h2>
+          <span @click="resetForm" class="close-button">&times;</span>
+          <h2>Generate Gaji</h2>
           <form @submit.prevent="submitForm">
             <div class="form-group">
-              <input type="text" list="datalistOptions" id="exampleDataList" v-model="newRecord.nama"
-                placeholder="Nama Karyawan" required />
-              <datalist id="datalistOptions">
-                <option v-for="option in datalistOptions" :value="option.name" :key="option.id"></option>
-              </datalist>
+              <label for="periodStart">Periode Mulai:</label>
+              <input type="month" v-model="newRecord.periodStart" id="periodStart" required />
             </div>
             <div class="form-group">
-              <input type="month" v-model="newRecord.periode" placeholder="Periode" required />
-            </div>
-            <div class="form-group">
-              <input type="number" v-model.number="newRecord.gajiPokok" placeholder="Gaji Pokok" required />
-            </div>
-            <div class="form-group">
-              <input type="number" v-model.number="newRecord.tunjangan" placeholder="Tunjangan" required />
-            </div>
-            <div class="form-group">
-              <input type="number" v-model.number="newRecord.potongan" placeholder="Potongan" required />
-            </div>
-            <div class="form-group">
-              <input type="number" v-model="calculatedTotalGaji" placeholder="Total Gaji" readonly />
+              <label for="periodEnd">Periode Akhir:</label>
+              <input type="month" v-model="newRecord.periodEnd" id="periodEnd" required />
             </div>
             <button type="submit" class="submit-button">Tambah</button>
           </form>
@@ -78,31 +64,18 @@ export default {
   data() {
     return {
       searchQuery: '',
-      showModal: false,
-      newRecord: {
-        nama: '',
-        periode: '',
-        gajiPokok: '',
-        tunjangan: '',
-        potongan: ''
-      },
-      records: [
-        { id: 1, nama: 'Dewi Maharani', periode: '2024-05', gajiPokok: 5000000, tunjangan: 100000, potongan: 50000, totalGaji: 5050000 },
-        { id: 2, nama: 'Annisa Aisyah', periode: '2024-05', gajiPokok: 5000000, tunjangan: 100000, potongan: 60000, totalGaji: 5040000 },
-        // Tambahkan data gaji lainnya sesuai kebutuhan
-      ]
+      _showModal: false,
+      newRecord: {},
+      records: []
     };
   },
   created() {
-    // Fetch data from API when component is created
-    this.fetchUserList();
+    this.resetForm();
+    this.fetchData();
   },
   computed: {
     filteredRecords() {
-      return this.records.filter(record =>
-        record.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        record.periode.includes(this.searchQuery)
-      );
+      return this.records.filter((item) => (this.findObjectValues(item, this.searchQuery)));
     },
     calculatedTotalGaji() {
       return this.newRecord.gajiPokok + this.newRecord.tunjangan - this.newRecord.potongan;
@@ -112,25 +85,50 @@ export default {
     formatCurrency(value) {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
     },
-    // Method to fetch user list from API
-    async fetchUserList() {
-      try {
-        const response = await axios.get('http://localhost:3000/api/v1/user/users');
-        this.datalistOptions = response.data.data;
-console.log(response.data.data);
-      } catch (error) {
-        console.error('Error fetching user list:', error);
-        // Handle error as needed
+    submitForm() {
+      if (this.submitForm.sleep)
+        return;
+      this.submitForm.sleep = true;
+
+      axios.post('/api/v1/admin/payslips/generate', this.newRecord).finally(() => {
+        this.fetchData();
+        delete this.submitForm.sleep;
+      })
+      
+      this.resetForm();
+    },
+    fetchData() {
+      axios.get('/api/v1/admin/payslips').then((res) => {
+        const data = res.data.data;
+        this.records = data;
+      });
+    },
+    resetForm() {
+      this._showModal = false;
+      const d = new Date();
+      const periodEnd = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}`
+      d.setMonth(d.getMonth()-1);
+      const periodStart = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2, '0')}`
+
+      this.newRecord = {
+        periodStart,
+        periodEnd
       }
     },
-    addGaji() {
-      this.showModal = true;
-    },
-    submitForm() {
-      const newId = this.records.length ? Math.max(...this.records.map(record => record.id)) + 1 : 1;
-      this.records.push({ id: newId, ...this.newRecord, totalGaji: this.calculatedTotalGaji });
-      this.newRecord = { nama: '', periode: '', gajiPokok: 0, tunjangan: 0, potongan: 0 };
-      this.showModal = false;
+    findObjectValues(object, value) {
+      for (const _values of Object.values(object)) {
+        if (!_values)
+          continue;
+        
+        if (typeof(_values) === 'object' && _values.constructor.name === 'Object')
+          if (this.findObjectValues(_values, value))
+            return true;
+
+        if (String(_values).toLowerCase().includes(value.toLocaleLowerCase()))
+          return true;
+      }
+      
+      return false;
     }
   }
 };
@@ -182,7 +180,6 @@ h1 {
   border-radius: 5px;
   display: flex;
   align-items: center;
-  max-width: 160px;
 }
 
 .add-button i {

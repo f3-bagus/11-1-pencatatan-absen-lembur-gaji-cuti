@@ -3,7 +3,7 @@
     <h1>Data Jabatan</h1>
     <div class="card">
       <div class="top-bar">
-        <button @click="showModal = true" class="add-button">
+        <button @click="_showModal=1;jabatanForm.order = jabatanList.reduce((max, curr) => (max > curr.order ? max : curr.order), 1) + 1;" class="add-button">
           <i class="bi bi-plus-circle"></i> Tambah Data Jabatan
         </button>
         <div class="search-container">
@@ -17,20 +17,26 @@
       <table class="jabatan-table">
         <thead>
           <tr>
-            <th>ID</th>
+            <th>Order</th>
             <th>Nama Jabatan</th>
+            <th>Gaji</th>
+            <th>Bonus Lembur</th>
+            <th>Potongan Absen</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="jabatan in filteredJabatan" :key="jabatan.id">
-            <td>{{ jabatan.id }}</td>
-            <td>{{ jabatan.nama }}</td>
+            <td>{{ jabatan.order }}</td>
+            <td>{{ jabatan.roleName }}</td>
+            <td>{{ formatCurrency(jabatan.salary) }}</td>
+            <td>{{ formatCurrency(jabatan.overtimeBonus) }}</td>
+            <td>{{ formatCurrency(jabatan.absenceDeduction) }}</td>
             <td class="actions">
-              <button class="edit-button" @click="editJabatan(jabatan.id)">
+              <button class="edit-button" @click="editJabatan(jabatan)">
                 <i class="bi bi-pencil-square"></i> Edit
               </button>
-              <button class="delete-button" @click="deleteJabatan(jabatan.id)">
+              <button class="delete-button" @click="deleteJabatan($event, jabatan.id)">
                 <i class="bi bi-trash"></i> Hapus
               </button>
             </td>
@@ -38,16 +44,24 @@
         </tbody>
       </table>
 
-      <div v-if="showModal" class="modal">
+      <div v-if="_showModal" class="modal">
         <div class="modal-content">
-          <span @click="showModal = false" class="close-button">&times;</span>
-          <h2>Tambah Jabatan</h2>
-          <form @submit.prevent="submitForm">
+          <span @click="closeModal" class="close-button">&times;</span>
+          <h2>{{ _showModal === 1 ? "Tambah Jabatan" : "Ubah Jabatan" }}</h2>
+          <form @submit.prevent="submitForm(_showModal)">
             <div class="form-group">
               <label for="namaJabatan">Nama Jabatan:</label>
-              <input type="text" id="namaJabatan" v-model="newJabatanNama" required />
+              <input type="text" id="namaJabatan" v-model="jabatanForm.roleName" required />
+              <label for="gaji">Gaji:</label>
+              <input type="text" id="gaji" v-model="jabatanForm.salary" required />
+              <label for="bonusOT">Bonus Lembur:</label>
+              <input type="text" id="bonusOT" v-model="jabatanForm.overtimeBonus" required />
+              <label for="absenceDeduction">Potongan Absen:</label>
+              <input type="text" id="absenceDeduction" v-model="jabatanForm.absenceDeduction" required />
+              <label for="order">Order:</label>
+              <input type="text" id="order" v-model="jabatanForm.order" required />
             </div>
-            <button type="submit" class="submit-button">Tambah</button>
+            <button type="submit" class="submit-button">{{ _showModal === 1 ? "Tambah" : "Ubah" }}</button>
           </form>
         </div>
       </div>
@@ -56,48 +70,104 @@
 </template>
 
 <script>
+import axios from '../../services/axios.js';
+
 export default {
   name: 'DataJabatan',
   data() {
     return {
       searchQuery: '',
-      showModal: false,
-      newJabatanNama: '',
-      jabatanList: [
-        { id: 1, nama: 'CEO (Chief Executive Officer)' },
-        { id: 2, nama: 'COO (Chief Operational Officer)' },
-        { id: 3, nama: 'CTO (Chief Technical Officer)' },
-        { id: 4, nama: 'CMO (Chief Marketing Officer)' },
-        { id: 5, nama: 'Sekretaris' },
-        { id: 6, nama: 'Bendahara' },
-        { id: 7, nama: 'Pemasaran' },
-        // Tambahkan data jabatan lainnya sesuai kebutuhan
-      ]
+      _showModal: 0,
+      jabatanForm: {},
+      jabatanList: []
     };
   },
   computed: {
     filteredJabatan() {
-      return this.jabatanList.filter(jabatan =>
-        jabatan.nama.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      this.jabatanList.sort((a, b) => (a.order - b.order));
+      return this.jabatanList.filter((item) => (this.findObjectValues(item, this.searchQuery)))
     }
   },
+  created() {
+    axios.get('/api/v1/user/roles').then((res) => {
+      const data = res.data.data;
+      const len = data.length;
+
+      for (let i = 0; i < len; i++) {
+        this.deleteNotNeededData(data[i]);
+      }
+
+      this.jabatanList = data;
+    });
+  },
   methods: {
-    addJabatan() {
-      this.showModal = true;
+    closeModal() {
+      this._showModal = 0;
+      this.jabatanForm = {};
     },
-    submitForm() {
-      const newId = this.jabatanList.length ? Math.max(...this.jabatanList.map(j => j.id)) + 1 : 1;
-      this.jabatanList.push({ id: newId, nama: this.newJabatanNama });
-      this.newJabatanNama = '';
-      this.showModal = false;
+    submitForm(method) {
+      switch (method) {
+        case 1:
+          axios.post('/api/v1/user/roles/create', this.jabatanForm).then((res) => {
+            const data = res.data?.data;
+            this.deleteNotNeededData(data);
+            this.jabatanList.push(data);
+          });
+          break;
+        case 2:
+          axios.put('/api/v1/user/roles/' + this.jabatanForm.id, this.jabatanForm).then((res) => {
+            const data = res.data?.data;
+            this.deleteNotNeededData(data);
+
+            const index = this.jabatanList.findIndex((item) => (item.id === data.id));
+            this.jabatanList[index] = data;
+          });
+          break;
+        default:
+          console.error("UNKNOWN BEHAVIOUR");
+          break;
+      }
+      this.closeModal();
     },
-    editJabatan(id) {
-      alert('Edit jabatan with ID: ' + id);
+    editJabatan(object) {
+      this.jabatanForm = structuredClone(object);
+      this._showModal = 2;
     },
-    deleteJabatan(id) {
-      this.jabatanList = this.jabatanList.filter(jabatan => jabatan.id !== id);
-      alert('Deleted jabatan with ID: ' + id);
+    deleteJabatan(e, id) {
+      if (e.target.sleep)
+        return;
+      e.target.sleep = true;
+
+      axios.delete("/api/v1/user/roles/" + id).then((res) => {
+        const index = this.jabatanList.findIndex((item) => item.id === res.data?.data?.id);
+        this.jabatanList.splice(index, 1);
+
+        delete e.target.sleep;
+      }).catch((err) => {
+        console.error(err.message);
+      });
+    },
+    findObjectValues(object, value) {
+      for (const _values of Object.values(object)) {
+        if (!_values)
+          continue;
+        
+        if (typeof(_values) === 'object' && _values.constructor.name === 'Object')
+          if (this.findObjectValues(_values, value))
+            return true;
+
+        if (String(_values).toLowerCase().includes(value.toLocaleLowerCase()))
+          return true;
+      }
+      
+      return false;
+    },
+    deleteNotNeededData(object) {
+      delete object.createdAt;
+      delete object.updatedAt;
+    },
+    formatCurrency(value) {
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
     }
   }
 };

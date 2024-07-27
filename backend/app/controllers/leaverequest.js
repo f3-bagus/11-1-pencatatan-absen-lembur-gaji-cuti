@@ -67,7 +67,7 @@ async function submitLeavePresence(userId, startDate, endDate) {
 async function confirmLeave(req, res) {
     try {
         if (req.leaveReq.status != "PENDING")
-            return res.json({ status: "OK", message: "You can't change confirmed data." });
+            return res.status(403).json({ status: "FAIL", message: "You can't change confirmed data." });
         
         const { status } = req.body;
         const { startDate, endDate } = req.leaveReq;

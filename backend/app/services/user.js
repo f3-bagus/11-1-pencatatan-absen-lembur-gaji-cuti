@@ -46,7 +46,27 @@ const create = async (payload, isAdmin) => {
     }
 }
 
-const update = async (userId, payload) => {
+const updateOne = async (id, payload, auth) => {
+    try {
+        const { email, password, name, address, phoneNumber, privilege, roleId } = payload;
+        const encryptedPassword = password ? await Auth.encryptPassword(password) : undefined;
+        const user = await UserRepo.findOne({ id });
+
+        return await user.update(({ 
+            email,
+            encryptedPassword,
+            name,
+            address,
+            phoneNumber,
+            privilege: auth === "ROOT" && privilege !== "ROOT" ? privilege : undefined,
+            roleId
+         }));
+    } catch (err) {
+        throw new ApplicationError(`Failed to update data. ${err.message}`,  err.statusCode || 500);
+    }
+}
+
+const update = async (payload, id) => {
     try {
         const { role } = payload
 
@@ -54,10 +74,19 @@ const update = async (userId, payload) => {
             throw new ApplicationError('Cannot Update Role User', 403)
         }
 
-        const data = await UserRepo.update(userId,payload)
-        return data
+        const data = await UserRepo.update(payload, { id });
+        return data[0];
     } catch (err) {
         throw new ApplicationError(`Failed to update data. ${err.message}`,  err.statusCode || 500);
+    }
+}
+
+const destroyOne = async (id) => {
+    try {
+        const role = await UserRepo.findOne({ id });
+        return await role.destroy();
+    } catch (err) {
+        throw new ApplicationError(`Failed to destroy data. ${err.message}`,  err.statusCode || 500);
     }
 }
 
@@ -72,8 +101,8 @@ const reset = async (user, payload) => {
             throw new ApplicationError("Password doesn't match", 400)
         }
         const encryptedPassword = await Auth.encryptPassword(newPassword)
-        const data = await UserRepo.update(user.id, { encryptedPassword: encryptedPassword })
-        return data
+        const data = await UserRepo.update({ encryptedPassword: encryptedPassword }, { id: user.id })
+        return data[0];
     } catch (err) {
         throw new ApplicationError(`Failed to update data. ${err.message}`,  err.statusCode || 500);
     }
@@ -134,7 +163,9 @@ module.exports = {
     forgotPassword,
     findAll,
     create,
+    updateOne,
     update,
+    destroyOne,
     checkUser,
     myCourse,
     notification,

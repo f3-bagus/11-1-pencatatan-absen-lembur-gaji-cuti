@@ -22,7 +22,8 @@ const cmpPassword = async (password, hash) => {
 }
 
 const createToken = (payload) => {
-    return jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: 3600 });
+    // return jwt.sign(payload, JWT_SECRET_KEY, { expiresIn: 3600 });
+    return jwt.sign(payload, JWT_SECRET_KEY);
 }
 
 const verifyToken = (token) => {

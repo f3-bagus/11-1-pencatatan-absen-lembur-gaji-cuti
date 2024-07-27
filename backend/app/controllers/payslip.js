@@ -28,6 +28,15 @@ const getUsers = async (req, res) => {
 	}
 }
 
+const findAll = async (req, res) => {
+	try {
+		const payslips = await payslipService.findAll();
+		res.json({ status: "OK", message: "Success", data: payslips });
+	} catch (err) {
+		res.status(err.statusCode || 400).json({ status: "FAIL", message: err.message });
+	}
+}
+
 const generatePayslips = async (req, res) => {
 	try {
 		const payslips = await payslipService.generatePayslips(req.body);
@@ -62,7 +71,7 @@ const findOne = async (req, res) => {
 }
 
 module.exports = {
-	// findAll,
+	findAll,
 	getUsers,
 	getUserPayslip,
 	findOne,

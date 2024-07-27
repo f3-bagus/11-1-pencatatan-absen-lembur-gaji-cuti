@@ -40,8 +40,10 @@ async function findOne(filter) {
     return await Presence.findOne({ where: filter, include: [User] });
 }
 
-async function update(payload) {
-    return await Presence.update(payload);
+async function update(payload, filter) {
+    if (typeof filter !== "object" && filter != null) return new Error('filter is not an object');
+    const [_, data] = await Payslip.update(payload, { where: filter, returning: true });
+    return data;
 }
 
 const getAllPresences = async () => {
@@ -53,7 +55,8 @@ const getAllPresences = async () => {
 const getAllPresencesUser = async (userId) => {
     return await Presence.findAll({
         where: { userId: userId },
-        include: [User]
+        include: [User],
+        order: [["id", "DESC"]]
     });
 }
 

@@ -9,7 +9,7 @@ const genericInclude = {
 };
 
 async function findAll() {
-    return await User.findAll({ include: [ genericInclude ], attributes: { exclude: ["encryptedPassword"] } });
+    return await User.findAll({ include: genericInclude, attributes: { exclude: ["encryptedPassword"] } });
 }
 
 async function create(body) {
@@ -23,7 +23,7 @@ async function create(body) {
 async function findOne(filter) {
     if (typeof filter !== "object" && filter != null) return new Error('filter is not an object');
     return await User.findOne({ where: filter, 
-        include: [ genericInclude ]
+        include: [ JobRole ]
     });
 }
 
@@ -31,13 +31,14 @@ async function checkPassword(password, hash) {
     return await bcrypt.compare(password, hash);
 }
 
-async function update(userId, payload) {
-    const [_,data] = await User.update(payload, { where: { id:userId }, returning:true });
-    return data[0]
+async function update(payload, filter) {
+    if (typeof filter !== "object" && filter != null) return new Error('filter is not an object');
+    const [_, data] = await User.update(payload, { where: filter, returning: true });
+    return data;
 }
 
 async function findByPk(id) {
-    return await User.findByPk(id);
+    return await User.findByPk(id, { include: "JobRole" });
 }
 
 async function notification(id) {

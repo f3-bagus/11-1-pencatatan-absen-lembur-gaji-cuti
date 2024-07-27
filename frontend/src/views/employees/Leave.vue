@@ -5,30 +5,18 @@
       <h2>Ajukan Cuti</h2>
       <form @submit.prevent="submitLeave">
         <div class="form-group">
-          <label for="leave_type">Jenis Cuti</label>
-          <select v-model="leaveType" required>
-            <option value="Annual Leave">Cuti Tahunan</option>
-            <option value="Sick Leave">Cuti Sakit</option>
-            <option value="Personal Leave">Cuti Pribadi</option>
-          </select>
-        </div>
-        <div class="form-group">
           <div class="date-inputs">
             <div>
               <label for="start_date">Tanggal Mulai</label>
-              <input type="date" v-model="startDate" required />
+              <input type="date" v-model="form.startDate" required />
             </div>
             <div>
               <label for="end_date">Tanggal Berakhir</label>
-              <input type="date" v-model="endDate" required />
+              <input type="date" v-model="form.endDate" required />
             </div>
           </div>
         </div>
-        <div class="form-group">
-          <label for="reason">Alasan</label>
-          <textarea v-model="reason" required></textarea>
-        </div>
-        <button type="submit">Ajukan</button>
+        <button class="w-100" type="submit">Ajukan</button>
       </form>
     </div>
 
@@ -39,18 +27,14 @@
         <thead>
           <tr>
             <th>Tanggal Mengajukan</th>
-            <th>Jenis Cuti</th>
             <th>Durasi Cuti</th>
-            <th>Alasan</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="history in leaveHistory" :key="history.leave_id">
-            <td>{{ history.submission_date }}</td>
-            <td>{{ history.leave_type }}</td>
-            <td>{{ formatDate(history.start_date) }} s/d {{ formatDate(history.end_date) }}</td>
-            <td>{{ history.reason }}</td>
+            <td>{{ formatDate(history.requestDate) }}</td>
+            <td>{{ formatDate(history.startDate) }} s/d {{ formatDate(history.endDate) }}</td>
             <td>{{ history.status }}</td>
           </tr>
         </tbody>
@@ -60,42 +44,43 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '../../services/axios.js';
 
 export default {
   data() {
+    const today = new Date();
+    const todayString = today.toISOString().split("T")[0];
     return {
-      leaveType: '',
-      startDate: '',
-      endDate: '',
-      reason: '',
-      leaveHistory: [],
-      nextLeaveId: 1,
+      sleep: false,
+      form: {
+        startDate: todayString,
+        endDate: todayString
+      },
+      leaveHistory: []
     };
   },
   created() {
     this.fetchLeaveHistory();
   },
   methods: {
-    submitLeave() {
-      const newLeave = {
-        leave_id: this.nextLeaveId++,
-        submission_date: new Date().toISOString().slice(0, 10),
-        leave_type: this.leaveType,
-        start_date: this.startDate,
-        end_date: this.endDate,
-        reason: this.reason,
-        status: 'Menunggu persetujuan',
-      };
-      // Simulasi pengajuan cuti dengan menambahkan data langsung ke leaveHistory
-      this.leaveHistory.push(newLeave);
-      this.resetForm();
+    async submitLeave() {
+      if (this.sleep)
+        return;
+
+      this.sleep = true;
+      try {
+        const res = await axios.post("/api/v1/user/leaves", this.form);
+        this.leaveHistory.push(res.data?.data);
+        this.resetForm();
+      } catch (err) {
+        console.error(err.message);
+      } finally {
+        this.sleep = false;
+      }
     },
     resetForm() {
-      this.leaveType = '';
-      this.startDate = '';
-      this.endDate = '';
-      this.reason = '';
+      this.form.startDate = '';
+      this.form.endDate = '';
     },
     formatDate(dateString) {
       const date = new Date(dateString);
@@ -104,7 +89,8 @@ export default {
     fetchLeaveHistory() {
       axios.get('/api/v1/user/leaves')
         .then(response => {
-          this.leaveHistory = response.data; // Mengisi leaveHistory dengan data dari API
+          const data = response.data?.data;
+          this.leaveHistory = data;
         })
         .catch(error => {
           console.error('Error fetching leave history:', error);

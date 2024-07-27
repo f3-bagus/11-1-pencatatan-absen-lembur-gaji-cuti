@@ -26,8 +26,10 @@ async function findOne(filter) {
     return await Payslip.findOne({ where: filter });
 }
 
-async function update(payload) {
-    return await Payslip.update(payload);
+async function update(payload, filter) {
+    if (typeof filter !== "object" && filter != null) return new Error('filter is not an object');
+    const [_, data] = await Payslip.update(payload, { where: filter, returning: true });
+    return data;
 }
 
 async function findByPk(id) {

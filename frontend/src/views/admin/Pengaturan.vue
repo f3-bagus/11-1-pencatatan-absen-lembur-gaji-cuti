@@ -4,18 +4,18 @@
 
     <div class="pengaturan-section">
       <h2>Pengaturan Akun Admin</h2>
-      <form @submit.prevent="updateAdminAccount">
+      <form @submit.prevent="updateAdminAccount($event)">
         <div class="form-group account">
           <label for="adminName">Nama Admin</label>
-          <input type="text" id="adminName" v-model="adminAccount.name" placeholder="Masukkan nama admin" required />
+          <input type="text" id="adminName" :value="userInfo.name" @input="event => form.name = event.target.value" placeholder="Masukkan nama admin" required />
         </div>
         <div class="form-group account">
           <label for="adminEmail">Email Admin</label>
-          <input type="email" id="adminEmail" v-model="adminAccount.email" placeholder="Masukkan email admin" required />
+          <input type="email" id="adminEmail" :value="userInfo.email" @input="event => form.email = event.target.value" placeholder="Masukkan email admin" required />
         </div>
         <div class="form-group account">
           <label for="adminPassword">Password Baru</label>
-          <input type="password" id="adminPassword" v-model="adminAccount.password" placeholder="Masukkan password baru" />
+          <input type="password" id="adminPassword" v-model="form.password" placeholder="Masukkan password baru" />
         </div>
         <button type="submit" class="submit-button">Update Akun</button>
       </form>
@@ -24,20 +24,30 @@
 </template>
 
 <script>
+import { mapMutations, mapState } from 'vuex';
+import axios from '../../services/axios.js';
+
 export default {
   name: 'Pengaturan',
   data() {
     return {
-      adminAccount: {
-        name: '',
-        email: '',
-        password: ''
-      },
+      form: {}
     };
   },
+  computed: {
+    ...mapState(['userInfo'])
+  },
   methods: {
-    updateAdminAccount() {
-      alert('Akun admin diperbarui');
+    ...mapMutations(['setUserInfo']),
+    updateAdminAccount(e) {
+      if (e.target.sleep)
+        return;
+      e.target.sleep = true;
+      
+      axios.put('/api/v1/user/' + this.userInfo.id, this.form).then((res) => {
+        this.setUserInfo(res.data.data);
+        alert('Akun admin diperbarui');
+      }).catch(()=>void 0).finally(() => this.form = {} && delete e.target.sleep);
     },
   }
 };

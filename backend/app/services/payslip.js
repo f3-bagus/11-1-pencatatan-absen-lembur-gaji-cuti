@@ -65,7 +65,6 @@ const getPayslip = async (payload) => {
 
 const generatePayslips = async (payload) => {
     try {
-        // const { periodStart, periodEnd } = payload;
         const periodStart = new Date(payload.periodStart);
         const periodEnd = new Date(payload.periodEnd);
         if (!periodStart || !periodEnd)
@@ -75,7 +74,6 @@ const generatePayslips = async (payload) => {
         const presenceInfo = await presenceRepository.findAll({
             presenceDate: { [Op.gte]: periodStart, [Op.lte]: periodEnd }
         });
-        console.log(presenceInfo);
         
         const ret = await payslipRepo.bulkCreate(parsePresence(payload, presenceInfo));
         ret.forEach((item) => (NotificationService.create(item.userId, { title: 'Payment', message: `This month net worth is ${item.netWorth.toLocaleString("id-ID", { style: "currency", currency:"IDR" })}` })));

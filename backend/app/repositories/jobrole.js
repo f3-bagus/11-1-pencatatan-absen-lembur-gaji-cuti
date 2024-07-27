@@ -28,8 +28,10 @@ async function findOne(filter) {
     return await JobRole.findOne({ where: filter });
 }
 
-async function update(payload) {
-    return await JobRole.update(payload);
+async function update(payload, filter) {
+    if (typeof filter !== "object" && filter != null) return new Error('filter is not an object');
+    const [_, data] = await JobRole.update(payload, { where: filter, returning: true });
+    return data;
 }
 
 async function findByPk(id) {

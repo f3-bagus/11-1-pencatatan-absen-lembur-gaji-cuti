@@ -6,27 +6,40 @@
     <div class="kartu-container">
       <div class="kartu jumlah-admin">
         <h2>Admin</h2>
-        <p>2</p>
+        <p>{{ Dashboard.admins }}</p>
       </div>
       <div class="kartu jumlah-karyawan">
         <h2>Karyawan</h2>
-        <p>100</p>
+        <p>{{ Dashboard.employees }}</p>
       </div>
       <div class="kartu data-kehadiran">
         <h2>Data Kehadiran</h2>
-        <p>95%</p>
+        <p>{{ Dashboard.presencePercentage }}</p>
       </div>
       <div class="kartu data-cuti">
         <h2>Data Karyawan Cuti</h2>
-        <p>25 Orang</p>
+        <p>{{ Dashboard.leaves ? Dashboard.leaves + ' Orang' : '-' }}</p>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import axios from '../../services/axios.js';
+
 export default {
+  data() {
+    return {
+      Dashboard: {}
+    }
+  },
   name: 'DashboardAdmin',
+  created() {
+    axios.get('/api/v1/admin/dashboard').then((res) => {
+      if (res.data.status === "OK")
+        this.Dashboard = res.data?.data;
+    })
+  },
 };
 </script>
 

@@ -3,7 +3,7 @@
     <h1>Data Karyawan</h1>
     <div class="card">
       <div class="top-bar">
-        <button @click="showModal = true" class="add-button">
+        <button @click="_showModal = 1" class="add-button">
           <i class="bi bi-plus-circle"></i> Tambah Data Karyawan
         </button>
         <div class="search-container">
@@ -17,28 +17,26 @@
       <table class="karyawan-table">
         <thead>
           <tr>
-            <th>ID</th>
             <th>Nama</th>
-            <th>NIK</th>
             <th>Jabatan</th>
             <th>Email</th>
             <th>Nomor Telepon</th>
+            <th>Authority</th>
             <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           <tr v-for="karyawan in filteredKaryawan" :key="karyawan.id">
-            <td>{{ karyawan.id }}</td>
-            <td>{{ karyawan.nama }}</td>
-            <td>{{ karyawan.nik }}</td>
-            <td>{{ karyawan.jabatan }}</td>
+            <td>{{ karyawan.name }}</td>
+            <td>{{ karyawan.JobRole?.roleName }}</td>
             <td>{{ karyawan.email }}</td>
-            <td>{{ karyawan.nomorTelepon }}</td>
+            <td>{{ karyawan.phoneNumber }}</td>
+            <td>{{ karyawan.privilege }}</td>
             <td class="actions">
-              <button class="action-button edit-button" @click="editKaryawan(karyawan.id)">
+              <button class="action-button edit-button" @click="editKaryawan(karyawan)">
                 <i class="bi bi-pencil-square"></i> Edit
               </button>
-              <button class="action-button delete-button" @click="deleteKaryawan(karyawan.id)">
+              <button class="action-button delete-button" @click="deleteKaryawan($event, karyawan.id)">
                 <i class="bi bi-trash"></i> Hapus
               </button>
             </td>
@@ -46,27 +44,38 @@
         </tbody>
       </table>
 
-      <div v-if="showModal" class="modal">
+      <div v-if="_showModal" class="modal">
         <div class="modal-content">
-          <span @click="showModal = false" class="close-button">&times;</span>
-          <h2>Tambah Karyawan</h2>
-          <form @submit.prevent="submitForm">
+          <span @click="closeModal" class="close-button">&times;</span>
+          <h2>{{ _showModal === 1 ? "Tambah Karyawan" : "Ubah Karyawan" }}</h2>
+          <form @submit.prevent="submitForm(_showModal)">
             <div class="form-group">
-              <input type="text" id="namaKaryawan" v-model="newKaryawan.nama" placeholder="Nama Karyawan" required />
+              <input type="text" id="namaKaryawan" v-model="karyawanForm.name" placeholder="Nama Karyawan"/>
             </div>
             <div class="form-group">
-              <input type="text" id="nikKaryawan" v-model="newKaryawan.nik" placeholder="NIK" required />
+              <input type="password" id="password" v-model="karyawanForm.password" placeholder="Password"/>
+            </div>
+            <div v-if="getJobOrder() && jabatanList.find((item) => item.id === karyawanForm.roleId)" class="form-group">
+              <select class="form-control" v-model="karyawanForm.roleId">
+                <option v-for="item in jabatanList" :value="item.id" :key="item.id">
+                {{ item.roleName }}
+                </option>
+              </select>
             </div>
             <div class="form-group">
-              <input type="text" id="jabatanKaryawan" v-model="newKaryawan.jabatan" placeholder="Jabatan" required />
+              <input type="email" id="emailKaryawan" v-model="karyawanForm.email" placeholder="Email"/>
             </div>
             <div class="form-group">
-              <input type="email" id="emailKaryawan" v-model="newKaryawan.email" placeholder="Email" required />
+              <input type="text" id="nomorTeleponKaryawan" v-model="karyawanForm.phoneNumber" placeholder="Nomor Telepon"/>
             </div>
-            <div class="form-group">
-              <input type="text" id="nomorTeleponKaryawan" v-model="newKaryawan.nomorTelepon" placeholder="Nomor Telepon" required />
+            <div v-if="getPrivilege() && isRoot && privileges.includes(karyawanForm.privilege)" class="form-group">
+              <select class="form-control" v-model="karyawanForm.privilege">
+                <option v-for="item in privileges" :value="item" :key="item">
+                {{ item }}
+                </option>
+              </select>
             </div>
-            <button type="submit" class="submit-button">Tambah</button>
+            <button type="submit" class="submit-button">{{ _showModal === 1 ? "Tambah" : "Ubah" }}</button>
           </form>
         </div>
       </div>
@@ -75,54 +84,110 @@
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import axios from '../../services/axios.js';
+
 export default {
   name: 'DataKaryawan',
   data() {
     return {
       searchQuery: '',
-      showModal: false,
-      newKaryawan: {
-        nama: '',
-        nik: '',
-        jabatan: '',
-        email: '',
-        nomorTelepon: ''
-      },
-      karyawanList: [
-        { id: 1, nama: 'Dewi Maharani', nik: '3374098101010007', jabatan: 'Frontend Developer', email: 'dewiimr283@gmail.com', nomorTelepon: '081234567890' },
-        { id: 2, nama: 'Annisa Aisyah', nik: '3374012340090003', jabatan: 'Frontend Developer', email: 'annisaaisyah@gmail.com', nomorTelepon: '082345678901' },
-        { id: 3, nama: 'Azyumi Azra', nik: '3374076540890008', jabatan: 'Frontend Developer', email: 'azyumiazraa@gmail.com', nomorTelepon: '082345678902' },
-        // Tambahkan data karyawan lainnya sesuai kebutuhan
-      ]
+      _showModal: false,
+      karyawanForm: {},
+      karyawanList: [],
+      jabatanList: [],
+      privileges: ['ADMIN', 'MEMBER']
     };
   },
+  created() {
+    axios.get('/api/v1/user/users').then((res) => {
+      const data = res.data.data;
+      this.karyawanList = data;
+    });
+
+    axios.get('/api/v1/user/roles').then((res) => {
+      const data = res.data.data;
+      this.jabatanList = data;
+    });
+  },
   computed: {
+    ...mapGetters(['isRoot', 'isAdmin']),
     filteredKaryawan() {
-      return this.karyawanList.filter(karyawan =>
-        karyawan.nama.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.nik.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.jabatan.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.email.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-        karyawan.nomorTelepon.toLowerCase().includes(this.searchQuery.toLowerCase())
-      );
+      return this.karyawanList.filter((item) => (this.findObjectValues(item, this.searchQuery)))
     }
   },
   methods: {
-    addKaryawan() {
-      this.showModal = true;
+    closeModal() {
+      this._showModal = 0;
+      this.karyawanForm = {};
     },
-    submitForm() {
-      const newId = this.karyawanList.length ? Math.max(...this.karyawanList.map(k => k.id)) + 1 : 1;
-      this.karyawanList.push({ id: newId, ...this.newKaryawan });
-      this.newKaryawan = { nama: '', nik: '', jabatan: '', email: '', nomorTelepon: '' };
-      this.showModal = false;
+    submitForm(method) {
+      switch (method) {
+        case 1:
+          const url = this.karyawanForm.privilege === "ADMIN" ? '/api/v1/admin/register' : '/api/v1/user/register';
+          axios.post(url, this.karyawanForm).then((res) => {
+            const data = res.data?.data;
+            data.JobRole = this.jabatanList.find((item) => item.id === data.roleId);
+            this.karyawanList.push(data);
+          });
+          break;
+        case 2:
+          axios.put('/api/v1/user/' + this.karyawanForm.id, this.karyawanForm).then((res) => {
+            const data = res.data?.data;
+            const index = this.karyawanList.findIndex((item) => (item.id === data.id));
+            this.karyawanList[index] = data;
+          });
+          break;
+        default:
+          console.error("UNKNOWN BEHAVIOUR");
+          break;
+      }
+      this.closeModal();
     },
-    editKaryawan(id) {
-      alert('Edit karyawan with ID: ' + id);
+    editKaryawan(object) {
+      this.karyawanForm = structuredClone(object);
+      this._showModal = 2;
     },
-    deleteKaryawan(id) {
-      this.karyawanList = this.karyawanList.filter(karyawan => karyawan.id !== id);
-      alert('Deleted karyawan with ID: ' + id);
+    deleteKaryawan(e, id) {
+      if (e.target.sleep)
+        return;
+      e.target.sleep = true;
+
+      axios.delete("/api/v1/user/" + id).then((res) => {
+        const index = this.karyawanList.findIndex((item) => item.id === res.data?.data?.id);
+        this.karyawanList.splice(index, 1);
+        
+        delete e.target.sleep;
+      }).catch((err) => {
+        console.error(err.message);
+      })
+    },
+    findObjectValues(object, value) {
+      for (const _values of Object.values(object)) {
+        if (!_values)
+          continue;
+        
+        if (typeof(_values) === 'object' && _values.constructor.name === 'Object')
+          if (this.findObjectValues(_values, value))
+            return true;
+
+        if (String(_values).toLowerCase().includes(value.toLocaleLowerCase()))
+          return true;
+      }
+      
+      return false;
+    },
+    getJobOrder() {
+      if (!this.karyawanForm.roleId)
+        this.karyawanForm.roleId = this.jabatanList.reduce((max, curr) => (max.order > curr.order ? max : curr), {}).id;
+
+      return this.karyawanForm.roleId;
+    },
+    getPrivilege() {
+      if (!this.karyawanForm.privilege)
+        this.karyawanForm.privilege = this.privileges[this.privileges.length-1];
+
+      return this.karyawanForm.privilege;
     }
   }
 };

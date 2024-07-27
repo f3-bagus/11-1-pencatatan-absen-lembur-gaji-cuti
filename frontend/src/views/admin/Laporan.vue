@@ -22,22 +22,16 @@
               <th colspan="6" class="table-keterangan text-center">Rekapitulasi Kehadiran Karyawan</th>
             </tr>
             <tr>
-              <th>Nama Karyawan</th>
-              <th>Tanggal</th>
-              <th>Status</th>
-              <th>Jam Masuk</th>
-              <th>Jam Keluar</th>
-              <th>Terlambat</th>
+              <th v-for="header in headers.attendance">{{ header }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in filteredAttendanceRecords" :key="record.id">
-              <td>{{ record.nama }}</td>
-              <td>{{ record.tanggal }}</td>
+            <tr v-for="record in filteredAttendanceRecords">
+              <td>{{ record.name }}</td>
+              <td>{{ record.presenceDate }}</td>
+              <td>{{ record.checkIn }}</td>
+              <td>{{ record.checkOut }}</td>
               <td>{{ record.status }}</td>
-              <td>{{ record.jamMasuk }}</td>
-              <td>{{ record.jamKeluar }}</td>
-              <td>{{ record.terlambat }}</td>
             </tr>
           </tbody>
         </table>
@@ -50,18 +44,14 @@
               <th colspan="4" class="table-keterangan text-center">Rekapitulasi Lembur</th>
             </tr>
             <tr>
-              <th>Nama Karyawan</th>
-              <th>Tanggal</th>
-              <th>Jumlah Jam</th>
-              <th>Keterangan</th>
+              <th v-for="header in headers.overtime">{{ header }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in filteredOvertimeRecords" :key="record.id">
-              <td>{{ record.nama }}</td>
-              <td>{{ record.tanggal }}</td>
-              <td>{{ record.jumlahJam }}</td>
-              <td>{{ record.keterangan }}</td>
+            <tr v-for="record in filteredOvertimeRecords">
+              <td>{{ record.name }}</td>
+              <td>{{ record.presenceDate }}</td>
+              <td>{{ record.overtime }}</td>
             </tr>
           </tbody>
         </table>
@@ -74,20 +64,15 @@
               <th colspan="5" class="table-keterangan text-center">Rekapitulasi Cuti</th>
             </tr>
             <tr>
-              <th>Nama Karyawan</th>
-              <th>Tanggal Mulai</th>
-              <th>Tanggal Selesai</th>
-              <th>Jenis Cuti</th>
-              <th>Keterangan</th>
+              <th v-for="header in headers.leave">{{ header }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in filteredLeaveRecords" :key="record.id">
-              <td>{{ record.nama }}</td>
-              <td>{{ record.tanggalMulai }}</td>
-              <td>{{ record.tanggalSelesai }}</td>
-              <td>{{ record.jenisCuti }}</td>
-              <td>{{ record.keterangan }}</td>
+            <tr v-for="record in filteredLeaveRecords">
+              <td>{{ record.name }}</td>
+              <td>{{ record.requestDate }}</td>
+              <td>{{ record.startDate }}</td>
+              <td>{{ record.endDate }}</td>
             </tr>
           </tbody>
         </table>
@@ -100,22 +85,16 @@
               <th colspan="6" class="table-keterangan text-center">Rekapitulasi Penggajian</th>
             </tr>
             <tr>
-              <th>Nama Karyawan</th>
-              <th>Periode</th>
-              <th>Gaji Pokok</th>
-              <th>Tunjangan</th>
-              <th>Potongan</th>
-              <th>Total Gaji</th>
+              <th v-for="header in headers.payment">{{ header }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-for="record in filteredSalaryRecords" :key="record.id">
-              <td>{{ record.nama }}</td>
-              <td>{{ record.periode }}</td>
-              <td>{{ formatCurrency(record.gajiPokok) }}</td>
-              <td>{{ formatCurrency(record.tunjangan) }}</td>
-              <td>{{ formatCurrency(record.potongan) }}</td>
-              <td>{{ formatCurrency(record.totalGaji) }}</td>
+            <tr v-for="record in filteredSalaryRecords">
+              <td>{{ record.name }}</td>
+              <td>{{ record.period }}</td>
+              <td>{{ record.salary }}</td>
+              <td>{{ record.deduction }}</td>
+              <td>{{ record.netWorth }}</td>
             </tr>
           </tbody>
         </table>
@@ -125,6 +104,7 @@
 </template>
 
 <script>
+import axios from '../../services/axios.js';
 import { ref, computed } from 'vue';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
@@ -132,61 +112,123 @@ import 'jspdf-autotable';
 export default {
   name: 'Laporan',
   setup() {
+    const headers = ref({
+      attendance: ['Nama Karyawan', 'Tanggal', 'Jam Masuk', 'Jam Keluar', 'Status'],
+      overtime: ['Nama Karyawan', 'Periode', 'Jumlah Jam'],
+      leave: ['Nama Karyawan', 'Tanggal Pengajuan', 'Tanggal Mulai', 'Tanggal Selesai'],
+      payment: ['Nama Karyawan', 'Periode', 'Gaji Pokok', 'Potongan', 'Total Gaji']
+    });
     const searchQuery = ref('');
-    const attendanceRecords = ref([
-      { id: 1, nama: 'Dewi Maharani', tanggal: '2024-06-01', status: 'Hadir', jamMasuk: '08:00', jamKeluar: '17:00', terlambat: 'Tidak' },
-      // Add more attendance records
-    ]);
-    const overtimeRecords = ref([
-      { id: 1, nama: 'Dewi Maharani', tanggal: '2024-06-01', jumlahJam: 2, keterangan: 'Project Deadline' },
-      // Add more overtime records
-    ]);
-    const leaveRecords = ref([
-      { id: 1, nama: 'Dewi Maharani', tanggalMulai: '2024-05-01', tanggalSelesai: '2024-05-05', jenisCuti: 'Cuti Tahunan', keterangan: 'Liburan' },
-      // Add more leave records
-    ]);
-    const salaryRecords = ref([
-      { id: 1, nama: 'Dewi Maharani', periode: '2024-05', gajiPokok: 5000000, tunjangan: 500000, potongan: 0, totalGaji: 5500000 },
-      // Add more salary records
-    ]);
+    const attendanceRecords = ref([]);
+    const overtimeRecords = ref([]);
+    const leaveRecords = ref([]);
+    const salaryRecords = ref([]);
+
+    // Presence info (used for attendance and overtime data)
+    axios.get('/api/v1/admin/presenceAll').then((res) => {
+      const data = res.data?.data;
+
+      for (const _value of Object.values(data)) {
+        attendanceRecords.value.push(
+          {
+            name: _value.User?.name,
+            presenceDate: new Date(_value.presenceDate).toLocaleDateString(),
+            checkIn: new Date(_value.checkIn).toLocaleTimeString(),
+            checkOut: new Date(_value.checkOut).toLocaleTimeString(),
+            status: _value.status
+          }
+        )
+
+        if (_value.overtime)
+          overtimeRecords.value.push(
+            {
+              name: _value.User?.name,
+              presenceDate: new Date(_value.presenceDate).toLocaleDateString(),
+              overtime: _value.overtime
+            }
+          )
+      }
+    }).catch((err) => {
+      console.error(err);
+    })
+
+    // Leave info
+    axios.get('/api/v1/admin/leaves').then((res) => {
+      const data = res.data.data;
+
+      for (const _value of Object.values(data)) {
+        if (_value.status === 'ACCEPTED')
+          leaveRecords.value.push({
+            name: _value.User?.name,
+            requestDate: new Date(_value.requestDate).toLocaleString(),
+            startDate: new Date(_value.startDate).toLocaleDateString(),
+            endDate: new Date(_value.endDate).toLocaleDateString()
+          });
+      }
+    });
+
+    // Payment info
+    axios.get('/api/v1/admin/payslips').then((res) => {
+      const data = res.data.data;
+      
+      for (const _value of Object.values(data)) {
+        salaryRecords.value.push({
+          name: _value.User?.name,
+          period: new Date(_value.periodStart).toLocaleDateString() + " - " + new Date(_value.periodEnd).toLocaleDateString(),
+          salary: formatCurrency(_value.salary),
+          deduction: formatCurrency(_value.deduction),
+          netWorth: formatCurrency(_value.netWorth)
+        })}
+    });
+    
+    function findObjectValues(object, value) {
+      for (const _values of Object.values(object)) {
+        if (!_values)
+          continue;
+        
+        if (typeof(_values) === 'object')
+          if (_values.constructor.name === 'Object') {
+            if (findObjectValues(_values, value))
+              return true;
+          } else if (_values.constructor.name === 'RefImpl') {
+            if (findObjectValues(_values.value, value))
+              return true;
+          }
+
+        if (String(_values).toLowerCase().includes(value.toLocaleLowerCase()))
+          return true;
+      }
+      
+      return false;
+    }
 
     const filteredAttendanceRecords = computed(() => {
-      return attendanceRecords.value.filter(record =>
-        record.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        record.tanggal.includes(searchQuery.value)
-      );
-    });
-    const filteredOvertimeRecords = computed(() => {
-      return overtimeRecords.value.filter(record =>
-        record.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        record.tanggal.includes(searchQuery.value)
-      );
-    });
-    const filteredLeaveRecords = computed(() => {
-      return leaveRecords.value.filter(record =>
-        record.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        record.tanggalMulai.includes(searchQuery.value) ||
-        record.tanggalSelesai.includes(searchQuery.value)
-      );
-    });
-    const filteredSalaryRecords = computed(() => {
-      return salaryRecords.value.filter(record =>
-        record.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        record.periode.includes(searchQuery.value)
-      );
+      return attendanceRecords.value.filter((item) => (findObjectValues(item, searchQuery.value)));
     });
 
-    const formatCurrency = (value) => {
+    const filteredOvertimeRecords = computed(() => {
+      return overtimeRecords.value.filter((item) => (findObjectValues(item, searchQuery.value)));
+    });
+
+    const filteredLeaveRecords = computed(() => {
+      return leaveRecords.value.filter((item) => (findObjectValues(item, searchQuery.value)));
+    });
+
+    const filteredSalaryRecords = computed(() => {
+      return salaryRecords.value.filter((item) => (findObjectValues(item, searchQuery.value)));
+    });
+
+    function formatCurrency(value) {
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(value);
     };
 
-    const generateReport = (format) => {
+    function generateReport(format) {
       if (format === 'pdf') {
         const doc = new jsPDF();
 
         doc.text('Laporan dan Analisis Karyawan', 10, 10);
 
-        const addTableWithHeader = (headerText, columns, data, startY) => {
+        function addTableWithHeader(headerText, columns, data, startY) {
           doc.autoTable({
             head: [[headerText]],
             body: [[]],
@@ -204,48 +246,25 @@ export default {
           });
         };
 
-        const attendanceData = filteredAttendanceRecords.value.map(record => [
-          record.nama,
-          record.tanggal,
-          record.status,
-          record.jamMasuk,
-          record.jamKeluar,
-          record.terlambat
-        ]);
-        addTableWithHeader('Keterangan Kehadiran', ['Nama Karyawan', 'Tanggal', 'Status', 'Jam Masuk', 'Jam Keluar', 'Terlambat'], attendanceData, doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 20);
+        const attendanceData = filteredAttendanceRecords.value.map((item) => Object.values(item));
+        addTableWithHeader('Keterangan Kehadiran', headers.value.attendance, attendanceData, doc.lastAutoTable ? doc.lastAutoTable.finalY + 15 : 20);
 
-        const overtimeData = filteredOvertimeRecords.value.map(record => [
-          record.nama,
-          record.tanggal,
-          record.jumlahJam,
-          record.keterangan
-        ]);
-        addTableWithHeader('Keterangan Lembur', ['Nama Karyawan', 'Tanggal', 'Jumlah Jam', 'Keterangan'], overtimeData, doc.lastAutoTable.finalY + 15);
+        const overtimeData = filteredOvertimeRecords.value.map((item) => Object.values(item));
+        addTableWithHeader('Keterangan Lembur', headers.value.overtime, overtimeData, doc.lastAutoTable.finalY + 15);
 
-        const leaveData = filteredLeaveRecords.value.map(record => [
-          record.nama,
-          record.tanggalMulai,
-          record.tanggalSelesai,
-          record.jenisCuti,
-          record.keterangan
-        ]);
-        addTableWithHeader('Keterangan Cuti', ['Nama Karyawan', 'Tanggal Mulai', 'Tanggal Selesai', 'Jenis Cuti', 'Keterangan'], leaveData, doc.lastAutoTable.finalY + 15);
+        const leaveData = filteredLeaveRecords.value.map((item) => Object.values(item));
+        addTableWithHeader('Keterangan Cuti', headers.value.leave, leaveData, doc.lastAutoTable.finalY + 15);
 
-        const salaryData = filteredSalaryRecords.value.map(record => [
-          record.nama,
-          record.periode,
-          formatCurrency(record.gajiPokok),
-          formatCurrency(record.tunjangan),
-          formatCurrency(record.potongan),
-          formatCurrency(record.totalGaji)
-        ]);
-        addTableWithHeader('Keterangan Penggajian', ['Nama Karyawan', 'Periode', 'Gaji Pokok', 'Tunjangan', 'Potongan', 'Total Gaji'], salaryData, doc.lastAutoTable.finalY + 15);
+        const salaryData = filteredSalaryRecords.value.map((item) => Object.values(item));
+        addTableWithHeader('Keterangan Penggajian', headers.value.payment, salaryData, doc.lastAutoTable.finalY + 15);
 
         doc.save('laporan_karyawan.pdf');
       } else if (format === 'csv') {
-        const downloadCSV = (data, filename) => {
-          const csvContent = "data:text/csv;charset=utf-8," 
-            + data.map(e => Object.values(e).join(",")).join("\n");
+        const downloadCSV = (header, data, filename) => {
+          let csvContent = "data:text/csv;charset=utf-8,";
+          csvContent += header.join(";") + "\n";
+          csvContent += data.map(e => Object.values(e).join(";")).join("\n");
+          
           const encodedUri = encodeURI(csvContent);
           const link = document.createElement("a");
           link.setAttribute("href", encodedUri);
@@ -255,14 +274,15 @@ export default {
           document.body.removeChild(link);
         };
 
-        downloadCSV(filteredAttendanceRecords.value, "attendance_records.csv");
-        downloadCSV(filteredOvertimeRecords.value, "overtime_records.csv");
-        downloadCSV(filteredLeaveRecords.value, "leave_records.csv");
-        downloadCSV(filteredSalaryRecords.value, "salary_records.csv");
+        downloadCSV(headers.value.attendance, filteredAttendanceRecords.value, "attendance_records.csv");
+        downloadCSV(headers.value.overtime, filteredOvertimeRecords.value, "overtime_records.csv");
+        downloadCSV(headers.value.leave, filteredLeaveRecords.value, "leave_records.csv");
+        downloadCSV(headers.value.payment, filteredSalaryRecords.value, "salary_records.csv");
       }
     };
 
     return {
+      headers,
       searchQuery,
       filteredAttendanceRecords,
       filteredOvertimeRecords,

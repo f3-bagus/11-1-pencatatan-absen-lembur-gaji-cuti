@@ -29,8 +29,10 @@ async function findOne(filter) {
     return await LeaveRequest.findOne({ where: filter, include: genericInclude  });
 }
 
-async function update(payload) {
-    return await LeaveRequest.update(payload);
+async function update(payload, filter) {
+    if (typeof filter !== "object" && filter != null) return new Error('filter is not an object');
+    const [_, data] = await LeaveRequest.update(payload, { where: filter, returning: true });
+    return data;
 }
 
 async function findByPk(id) {

@@ -45,7 +45,7 @@ module.exports = {
       } 
     }
 
-    await queryInterface.bulkInsert('Payslips', data)
+    // await queryInterface.bulkInsert('Payslips', data)
   },
 
   async down (queryInterface, Sequelize) {

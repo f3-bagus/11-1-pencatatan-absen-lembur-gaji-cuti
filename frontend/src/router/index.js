@@ -1,9 +1,9 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import store from '../store/index';
 import Dashboard from '../views/employees/Dashboard.vue';
 import Leave from '../views/employees/Leave.vue';
 import Payroll from '../views/employees/Payroll.vue';
 import AdminDashboard from '../views/admin/AdminDashboard.vue';
-import Karyawan from '../views/admin/Karyawan.vue';
 import DataJabatan from '../views/admin/DataJabatan.vue';
 import DataKaryawan from '../views/admin/DataKaryawan.vue';
 import Kehadiran from '../views/admin/Kehadiran.vue';
@@ -22,72 +22,114 @@ const routes = [
     path: '/',
     name: 'Dashboard',
     component: Dashboard,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/leave',
     name: 'Leave',
     component: Leave,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/payroll',
     name: 'Payroll',
     component: Payroll,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/profile',
     name: 'Profile',
-    component: EmployeeProfile
+    component: EmployeeProfile,
+    meta: {
+      requiresAuth: true
+    }
   },
   {
     path: '/notifications',
     name: 'Notifications',
     component: Notification,
+    meta: {
+      requiresAuth: true
+    }
   },
 
   {
     path: '/admin',
     name: 'AdminDashboard',
     component: AdminDashboard,
-  },
-  {
-    path: '/admin/karyawan',
-    name: 'Karyawan',
-    component: Karyawan,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/karyawan/datajabatan',
     name: 'DataJabatan',
     component: DataJabatan,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/karyawan/datakaryawan',
     name: 'DataKaryawan',
     component: DataKaryawan,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/kehadiran',
     name: 'Kehadiran',
     component: Kehadiran,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/lemburcuti',
     name: 'Lembur dan Cuti',
     component: LemburCuti,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/gaji',
     name: 'Gaji',
     component: Gaji,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/laporan',
     name: 'Laporan',
     component: Laporan,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/admin/pengaturan',
     name: 'Pengaturan',
     component: Pengaturan,
+    meta: {
+      requiresAuth: true,
+      requirePrivilege: ['ROOT', 'ADMIN']
+    }
   },
   {
     path: '/login',
@@ -103,6 +145,9 @@ const routes = [
     path: '/registerAdmin', 
     name: 'RegisterAdmin',
     component: RegisterAdmin,
+    meta: {
+      requiresAuth: true
+    }
   },
   // Additional admin routes can go here
 ];
@@ -111,5 +156,20 @@ const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
 });
+
+router.beforeEach(async (to, from, next) => {
+  if (to.meta.requiresAuth) {
+    const token = localStorage.getItem('token');
+    if (!token)
+      return next("/login");
+
+    if (!Object.keys(store.getters.userInfo).length)
+      await store.dispatch('fetchUserInfo');
+    
+    if (to.meta.requirePrivilege && !to.meta.requirePrivilege.includes(store.getters.userInfo.privilege))
+      return next("/");
+  }
+  return next();
+})
 
 export default router;

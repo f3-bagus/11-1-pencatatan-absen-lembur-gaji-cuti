@@ -3,10 +3,10 @@
     <div class="container-fluid">
       <h3 class="navbar-brand">Logo</h3>
       <div class="profile d-flex align-items-center">
-        <p class="mb-0 me-3" @click="goToProfile" style="cursor: pointer;">Annisa</p>
+        <p class="mb-0 me-3" @click="goToProfile" style="cursor: pointer;">{{userInfo.name ? userInfo.name : "NO NAME"}}</p>
         <div class="notifikasi position-relative" @click="goToNotifications" style="cursor: pointer;">
           <i class="bi bi-bell" style="font-size: 1.5rem; color: white;"></i>
-          <span class="badge">3</span>
+          <span class="badge" v-if="notifications.length">{{notifications.length > 99 ? "99+" : notifications.length}}</span>
         </div>
       </div>
     </div>
@@ -14,7 +14,21 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
+  // data() {
+  //   let profileName = localStorage.getItem('name');
+  //   if (!profileName || profileName === "")
+  //     profileName = "NO NAME";
+
+  //   return {
+  //     profileName
+  //   };
+  // },
+  computed: {
+    ...mapState(['userInfo', 'notifications'])
+  },
   name: 'Navbar',
   methods: {
     goToProfile() {

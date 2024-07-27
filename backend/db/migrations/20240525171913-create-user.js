@@ -45,7 +45,7 @@ module.exports = {
       },
       image: {
         type: Sequelize.STRING,
-        defaultValue: "https://res.cloudinary.com/djsjnrfv0/image/upload/v1702988069/BINAR/mqtkzduziqwhdvxu1vzh.png"
+        defaultValue: "https://via.placeholder.com/150"
       },
       createdAt: {
         allowNull: false,

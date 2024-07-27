@@ -1,7 +1,7 @@
 <template>
   <aside class="admin-sidebar">
     <div class="sidebar-header">
-      <img src="path/to/logo.png" alt="Admin Logo" class="sidebar-logo" />
+      <img src="/img/logo.png" alt="Admin Logo" class="sidebar-logo" />
       <h2 class="sidebar-title">Admin Panel</h2>
     </div>
     <ul class="sidebar-menu">
@@ -17,7 +17,7 @@
           <i :class="{'bi-chevron-left': true, 'rotated': activeSubmenu === 'Karyawan'}" class="submenu-icon"></i>
         </a>
         <ul v-if="activeSubmenu === 'Karyawan'" class="sidebar-submenu">
-          <li :class="{ active: activeItem === 'Data Jabatan' }" @click="setActive('Data Jabatan')">
+          <li v-if="isRoot" :class="{ active: activeItem === 'Data Jabatan' }" @click="setActive('Data Jabatan')">
             <router-link to="/admin/karyawan/datajabatan" class="sidebar-link">Data Jabatan</router-link>
           </li>
           <li :class="{ active: activeItem === 'Data Karyawan' }" @click="setActive('Data Karyawan')">
@@ -52,6 +52,7 @@
 
 <script>
 import swal from 'sweetalert';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'AdminSidebar',
@@ -61,7 +62,11 @@ export default {
       activeSubmenu: ''
     };
   },
+  computed: {
+    ...mapGetters(['isRoot'])
+  },
   methods: {
+    ...mapActions(['clearUserInfo']),
     setActive(item) {
       this.activeItem = item;
     },
@@ -92,8 +97,7 @@ export default {
         dangerMode: true,
       }).then((willLogout) => {
         if (willLogout) {
-          // Implement actual logout logic here
-          console.log('Logging out...');
+          this.clearUserInfo();
           this.$router.push('/login');
         }
       });

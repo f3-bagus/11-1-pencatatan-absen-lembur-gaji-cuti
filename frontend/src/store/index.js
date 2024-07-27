@@ -1,31 +1,36 @@
 import { createStore } from 'vuex';
+import axios from '../services/axios';
 
 const store = createStore({
   state: {
     currentTime: new Date(),
     attendance: [],
     leaveApplications: [],
-    annualLeaveBalance: 12, // misalnya sisa cuti tahunan adalah 12 hari
+    userInfo: {},
+    notifications: []
   },
   getters: {
-    formattedTime: (state) => state.currentTime.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
-    formattedDate: (state) => state.currentTime.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }),
     attendanceList: (state) => state.attendance,
-    leaveApplications: (state) => state.leaveApplications,
-    annualLeaveBalance: (state) => state.annualLeaveBalance,
+    leaveApplications: (state) => state.leaveApplicationsm,
+    userInfo: (state) => state.userInfo,
+    isRoot: (state) => state.userInfo.privilege === "ROOT",
+    isAdmin: (state) => ["ROOT", "ADMIN"].includes(state.userInfo.privilege)
   },
   mutations: {
-    updateTime(state) {
-      state.currentTime = new Date();
-    },
     addAttendance(state, payload) {
-      state.attendance.push(payload);
+      if (state.attendance.length && state.attendance[0].id === payload.id)
+        state.attendance[0] = payload;
+      else
+        state.attendance.unshift(payload);
+    },
+    setAttendance(state, payload) {
+      state.attendance = payload;
     },
     ADD_LEAVE_APPLICATION(state, application) {
       state.leaveApplications.push(application);
     },
-    DECREMENT_LEAVE_BALANCE(state, days) {
-      state.annualLeaveBalance -= days;
+    setUserInfo(state, payload) {
+      state.userInfo = payload;
     }
   },
   actions: {
@@ -35,9 +40,58 @@ const store = createStore({
     addAttendance({ commit }, payload) {
       commit('addAttendance', payload);
     },
+    setAttendance({ commit }, payload) {
+      commit('setAttendance', payload);
+    },
     submitLeaveApplication({ commit }, application) {
       commit('ADD_LEAVE_APPLICATION', application);
       commit('DECREMENT_LEAVE_BALANCE', application.days);
+    },
+    fetchUserInfo() {
+      return axios.post("/api/v1/user/current-user").then((res) => {
+        return this.state.userInfo = res.data?.data;
+      }).catch((err) => {
+        console.error(err.message);
+        this.state.userInfo = {};
+        this.$router.push("/login");
+      })
+    },
+    fetchNotification() {
+      axios.get("/api/v1/user/notifications").then((res) => {
+          this.state.notifications = res.data?.data;
+      }).catch((err) => {
+        console.error(err.message);
+      })
+    },
+    deleteNotification({ commit }, id) {
+      axios.delete("/api/v1/user/notifications/" + id).then((res) => {
+        if (res.status === 200) {
+          const index = this.state.notifications.findIndex((item) => item.id === res.data?.data?.id);
+          this.state.notifications.splice(index, 1);
+        }
+      }).catch((err) => {
+        console.error(err.message);
+      })
+    },
+    refreshUserInfo({ commit }) {
+      this.dispatch('fetchUserInfo');
+      this.dispatch('fetchNotification');
+    },
+    clearUserInfo() {
+      localStorage.removeItem('token');
+      this.state.userInfo = {};
+      this.state.notifications.length = 0;
+    },
+    login({ commit }, payload) {
+      return axios.post('/api/v1/user/login', payload, { headers: { 'Content-Type': 'application/json' }}).then((res) => {
+        localStorage.setItem('token', res.data.data.token);
+        commit('setUserInfo', res.data.data);
+        this.dispatch('fetchNotification'); 
+        return res;
+      }).catch((err) => {
+        if (err.response?.data?.status === 'FAIL')
+          throw new Error(err.response?.data?.message);
+      });
     }
   }
 });

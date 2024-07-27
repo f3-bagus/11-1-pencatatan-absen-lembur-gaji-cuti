@@ -7,9 +7,11 @@
           <div class="card-body">
             <h5 class="card-title">Slip Gaji Terbaru</h5>
             <div class="pay-slip">
-              <p><strong>Nama :</strong> {{ latestPaySlip.name }}</p>
-              <p><strong>Tanggal :</strong> {{ latestPaySlip.date }}</p>
-              <p><strong>Gaji :</strong> {{ latestPaySlip.salary }}</p>
+              <p><strong>Periode :</strong> {{ latestPaySlip.period }}</p>
+              <p><strong>Gaji Pokok :</strong> {{ latestPaySlip.salary }}</p>
+              <p><strong>Bonus Lembur :</strong> {{ latestPaySlip.overtimeBonus }}</p>
+              <p><strong>Pengurangan :</strong> {{ latestPaySlip.deduction }}</p>
+              <p><strong>Total :</strong> {{ latestPaySlip.netWorth }}</p>
             </div>
           </div>
         </div>
@@ -19,16 +21,18 @@
 </template>
 
 <script>
-import axios from 'axios';
+import axios from '../../services/axios.js';
 
 export default {
   name: 'Payroll',
   data() {
     return {
       latestPaySlip: {
-        name: '',
-        date: '',
+        period: '',
         salary: '',
+        overtimeBonus: '',
+        deduction: '',
+        netWorth: ''
       },
     };
   },
@@ -39,11 +43,16 @@ export default {
     fetchLatestPaySlip() {
       axios.get('/api/v1/user/payslips')
         .then(response => {
-          // Mengambil data slip gaji terbaru dari response
-          const latestPaySlip = response.data[0]; // Misalnya mengambil data pertama dari array
-          this.latestPaySlip.name = latestPaySlip.name;
-          this.latestPaySlip.date = latestPaySlip.date;
+          const data = response.data.data;
+          if (!data.length)
+            return;
+          
+          const latestPaySlip = data[0];
+          this.latestPaySlip.period = `${new Date(latestPaySlip.periodStart).toLocaleDateString()} s/d ${new Date(latestPaySlip.periodEnd).toLocaleDateString()}`
           this.latestPaySlip.salary = latestPaySlip.salary;
+          this.latestPaySlip.overtimeBonus = latestPaySlip.overtimeBonus;
+          this.latestPaySlip.deduction = latestPaySlip.deduction;
+          this.latestPaySlip.netWorth = latestPaySlip.netWorth;
         })
         .catch(error => {
           console.error('Error fetching latest pay slip:', error);

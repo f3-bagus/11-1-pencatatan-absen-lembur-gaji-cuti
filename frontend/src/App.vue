@@ -9,10 +9,13 @@
 </template>
 
 <script>
+import axios from './services/axios';
+
 import EmployeeNavbar from './components/EmployeeNavbar.vue';
 import EmployeeSidebar from './components/EmployeeSidebar.vue';
 import AdminNavbar from './components/AdminNavbar.vue';
 import AdminSidebar from './components/AdminSidebar.vue';
+import { mapActions } from 'vuex';
 
 export default {
   name: 'App',
@@ -47,6 +50,9 @@ export default {
       }
     },
   },
+  methods: {
+    ...mapActions(['refreshUserInfo'])
+  }
 };
 </script>
 
