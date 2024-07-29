@@ -4,7 +4,7 @@
       <img src="/img/Logo_Appsensi.png" alt="Logo" class="navbar-brand" style="height: 40px; width: 100px;">
       <div class="profile d-flex align-items-center">
         <p class="mb-0 me-3" @click="goToProfile" style="cursor: pointer;">{{userInfo.name ? userInfo.name : "NO NAME"}}</p>
-        <div class="notifikasi position-relative" @click="goToNotifications" style="cursor: pointer;">
+        <div class="notifikasi position-relative" @click="goToNotification" style="cursor: pointer;">
           <i class="bi bi-bell" style="font-size: 1.5rem; color: white;"></i>
           <span class="badge" v-if="notifications.length">{{notifications.length > 99 ? "99+" : notifications.length}}</span>
         </div>

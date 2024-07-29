@@ -27,7 +27,7 @@ export default {
     ...mapState(['userInfo'])
   },
   async created() {
-    state.commit('fetchUserInfo');
+    state.dispatch('fetchUserInfo');
   }
 };
 </script>
